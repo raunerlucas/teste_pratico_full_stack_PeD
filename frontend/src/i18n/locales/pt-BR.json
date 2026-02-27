@@ -1,0 +1,107 @@
+{
+  "app": {
+    "title": "Gestão Industrial",
+    "subtitle": "Gerenciamento de Insumos e Otimização de Produção"
+  },
+  "nav": {
+    "home": "Início",
+    "rawMaterials": "Matérias-Primas",
+    "products": "Produtos",
+    "production": "Otimização de Produção"
+  },
+  "common": {
+    "actions": "Ações",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "new": "Novo",
+    "search": "Buscar",
+    "loading": "Carregando...",
+    "noData": "Nenhum registro encontrado.",
+    "success": "Operação realizada com sucesso!",
+    "error": "Ocorreu um erro. Tente novamente.",
+    "confirmDelete": "Tem certeza que deseja excluir este registro?",
+    "confirmDeleteTitle": "Confirmar Exclusão",
+    "yes": "Sim",
+    "no": "Não",
+    "code": "Código",
+    "name": "Nome",
+    "required": "Campo obrigatório",
+    "invalidValue": "Valor inválido"
+  },
+  "home": {
+    "welcome": "Bem-vindo ao Sistema de Gestão Industrial",
+    "description": "Gerencie matérias-primas, produtos e otimize sua produção para obter o maior valor de venda.",
+    "rawMaterialsCount": "Matérias-Primas",
+    "productsCount": "Produtos",
+    "optimizeProduction": "Otimizar Produção",
+    "quickActions": "Ações Rápidas",
+    "newRawMaterial": "Nova Matéria-Prima",
+    "newProduct": "Novo Produto",
+    "viewOptimization": "Ver Otimização",
+    "overview": "Visão Geral"
+  },
+  "rawMaterial": {
+    "title": "Matérias-Primas",
+    "new": "Nova Matéria-Prima",
+    "edit": "Editar Matéria-Prima",
+    "code": "Código",
+    "name": "Nome",
+    "stockQuantity": "Quantidade em Estoque",
+    "codePlaceholder": "Ex: MP001",
+    "namePlaceholder": "Ex: Farinha de Trigo",
+    "stockPlaceholder": "Ex: 500",
+    "deleteConfirm": "Tem certeza que deseja excluir a matéria-prima \"{name}\"?",
+    "created": "Matéria-prima criada com sucesso!",
+    "updated": "Matéria-prima atualizada com sucesso!",
+    "deleted": "Matéria-prima excluída com sucesso!"
+  },
+  "product": {
+    "title": "Produtos",
+    "new": "Novo Produto",
+    "edit": "Editar Produto",
+    "code": "Código",
+    "name": "Nome",
+    "price": "Preço (R$)",
+    "compositions": "Composição",
+    "compositionCount": "Nº de Insumos",
+    "codePlaceholder": "Ex: PRD001",
+    "namePlaceholder": "Ex: Pão Francês",
+    "pricePlaceholder": "Ex: 12.50",
+    "addComposition": "Adicionar Insumo",
+    "removeComposition": "Remover",
+    "selectRawMaterial": "Selecione uma matéria-prima",
+    "requiredQuantity": "Qtd. Necessária",
+    "quantityPlaceholder": "Ex: 200",
+    "noCompositions": "Nenhuma composição adicionada.",
+    "deleteConfirm": "Tem certeza que deseja excluir o produto \"{name}\"?",
+    "created": "Produto criado com sucesso!",
+    "updated": "Produto atualizado com sucesso!",
+    "deleted": "Produto excluído com sucesso!"
+  },
+  "production": {
+    "title": "Otimização de Produção",
+    "optimize": "Calcular Produção Ótima",
+    "optimizing": "Calculando...",
+    "stockOverview": "Estoque Atual",
+    "result": "Resultado da Otimização",
+    "summary": "Resumo",
+    "productCode": "Código do Produto",
+    "productName": "Produto",
+    "quantity": "Quantidade",
+    "unitPrice": "Preço Unitário",
+    "totalValue": "Valor Total",
+    "grandTotal": "Valor Total de Venda",
+    "suggestedProducts": "Produtos Sugeridos",
+    "noSuggestions": "Nenhuma sugestão de produção disponível com o estoque atual.",
+    "description": "Analise o estoque atual e descubra quais produtos fabricar para obter o maior valor total de venda."
+  },
+  "footer": {
+    "text": "Teste Prático Full Stack — P&D",
+    "rights": "Todos os direitos reservados."
+  }
+}
+

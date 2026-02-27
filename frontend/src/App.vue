@@ -1,47 +1,30 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import {ref} from 'vue'
+import AppHeader from '@/components/layout/AppHeader.vue'
+import AppSidebar from '@/components/layout/AppSidebar.vue'
+import AppFooter from '@/components/layout/AppFooter.vue'
+
+const sidebarOpen = ref(false)
+
+function toggleSidebar() {
+  sidebarOpen.value = !sidebarOpen.value
+}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+  <div class="min-h-screen bg-gray-50 flex flex-col">
+    <AppHeader @toggle-sidebar="toggleSidebar" />
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+    <div class="flex flex-1">
+      <AppSidebar :open="sidebarOpen" @close="sidebarOpen = false" />
+
+      <main class="flex-1 p-6 lg:p-8 overflow-auto">
+        <router-view />
+      </main>
     </div>
-  </header>
 
-  <main>
-    <TheWelcome />
-  </main>
+    <AppFooter />
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-}
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
-</style>

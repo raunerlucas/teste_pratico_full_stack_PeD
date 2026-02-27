@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![CI/CD](https://github.com/seu-usuario/teste_pratico_full_stack_PeD/actions/workflows/ci.yml/badge.svg)
+![CI/CD](https://github.com/raunerlucas/teste_pratico_full_stack_PeD/actions/workflows/ci.yml/badge.svg)
 
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)

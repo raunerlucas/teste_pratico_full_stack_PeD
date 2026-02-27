@@ -37,6 +37,9 @@ jobs:
           java-version: 21
           cache: maven
 
+      - name: 🔐 Make Maven Wrapper executable
+        run: chmod +x ./mvnw
+
       - name: 📦 Install dependencies
         run: ./mvnw dependency:resolve -B
 

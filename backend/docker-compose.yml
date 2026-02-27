@@ -16,8 +16,8 @@ services:
       - SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS=true
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/swagger-ui.html"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api-docs"]
       interval: 30s
       timeout: 10s
-      start_period: 40s
+      start_period: 60s
       retries: 3

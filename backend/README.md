@@ -10,8 +10,8 @@ API REST para gerenciamento de insumos e otimização de produção industrial, 
 - [Tecnologias & Dependências](#-tecnologias--dependências)
 - [Pré-requisitos](#-pré-requisitos)
 - [Como Rodar](#-como-rodar)
-- [Configuração](#-configuração)
 - [Docker](#-docker)
+- [Configuração](#-configuração)
 - [Swagger / OpenAPI](#-swagger--openapi)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
 - [Diagrama de Classes (Mermaid)](#-diagrama-de-classes)
@@ -28,10 +28,10 @@ O backend é responsável por:
 
 1. **CRUD de Matérias-Primas (Raw Materials)** — cadastro, edição, listagem e remoção de insumos com controle de estoque.
 2. **CRUD de Produtos (Products)** — cadastro, edição, listagem e remoção de produtos, incluindo a composição (quais matérias-primas e quantidades são necessárias para fabricar 1 unidade).
-6. **Containerização** — Dockerfile multi-stage e Docker Compose para execução isolada e reprodutível.
+3. **Cálculo de Otimização de Produção** — algoritmo guloso (Greedy) que analisa o estoque atual de matérias-primas e sugere **quais produtos fabricar e em que quantidade** para obter o **maior valor total de venda**, resolvendo conflitos quando dois ou mais produtos disputam a mesma matéria-prima.
+4. **Segurança** — camada de autenticação/autorização via Spring Security (CORS habilitado, CSRF desabilitado para API REST).
 5. **Documentação interativa** — Swagger UI com OpenAPI 3 para explorar e testar todos os endpoints diretamente pelo navegador.
-3. **Cálculo de Otimização de Produção** — algoritmo que analisa o estoque atual de matérias-primas e sugere **quais produtos fabricar e em que quantidade** para obter o **maior valor total de venda**, resolvendo conflitos quando dois ou mais produtos disputam a mesma matéria-prima.
-4. **Segurança** — camada de autenticação/autorização via Spring Security.
+6. **Containerização** — Dockerfile multi-stage e Docker Compose para execução isolada e reprodutível com um único comando.
 
 ---
 
@@ -40,214 +40,34 @@ O backend é responsável por:
 | Tecnologia | Versão | Finalidade |
 |---|---|---|
 | **Java** | 21 | Linguagem principal |
-| **SpringDoc OpenAPI** | 2.8.6 | Documentação Swagger UI / OpenAPI 3 |
 | **Spring Boot** | 4.0.3 | Framework backend |
 | **Spring Data JPA** | — | Persistência e ORM (Hibernate) |
-| **Docker Compose** | — | Orquestração de containers |
-| **Docker** | — | Containerização da aplicação |
-| **Spring Security** | — | Autenticação e autorização |
+| **Spring Security** | — | Autenticação, autorização e CORS |
 | **Spring Web MVC** | — | Exposição de endpoints REST |
-| **H2 Database** | runtime | Banco relacional embarcado |
+| **SpringDoc OpenAPI** | 2.8.6 | Documentação Swagger UI / OpenAPI 3 |
+| **H2 Database** | runtime | Banco relacional embarcado (em memória) |
 | **Lombok** | — | Redução de boilerplate (getters, setters, builders) |
-### Execução local (sem Docker)
 | **Spring Boot DevTools** | runtime | Hot-reload em desenvolvimento |
-| **JUnit 5 + Spring Test** | test | Testes unitários e de integração |
+| **Docker** | — | Containerização da aplicação (multi-stage build) |
+| **Docker Compose** | — | Orquestração de containers |
+| **JUnit 5 + Mockito** | test | Testes unitários e de integração |
 
+---
 
-- **Docker Compose** — incluído no Docker Desktop
+## 📋 Pré-requisitos
+
+### Execução com Docker (recomendado) ✅
+
+Apenas:
 - **Docker** — [Download](https://docs.docker.com/get-docker/)
-### Execução com Docker
----
+- **Docker Compose** — incluído no Docker Desktop
 
-| **Docker Multi-stage** | Build otimizado: JDK para compilação, JRE para execução (imagem final menor) |
-| **Swagger / OpenAPI 3** | Documentação interativa auto-gerada com SpringDoc OpenAPI |
+> 💡 Não é necessário instalar Java, Maven ou banco de dados.
 
-```
-docker compose run --rm backend ./mvnw test
-```bash
-**Com Docker:**
-
-> ⚠️ Ao utilizar Docker, o H2 Console está habilitado com `SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS=true` para permitir acesso externo ao container.
-
----
-
-| `GET` | `/api-docs` | Especificação OpenAPI 3 (JSON) |
-| `GET` | `/swagger-ui.html` | Interface interativa Swagger UI |
-|---|---|---|
-| Método | Endpoint | Descrição |
-
-### Documentação / Swagger
-
-> 💡 **Todos os endpoints podem ser explorados e testados diretamente pelo [Swagger UI](http://localhost:8080/swagger-ui.html).**
-            +customOpenAPI() OpenAPI
-        class OpenApiConfig {
-
-        }
-            +corsConfigurationSource() CorsConfigurationSource
-├── docker-compose.yml                             # Orquestração Docker
-├── Dockerfile                                     # Multi-stage build (JDK → JRE)
-│   │   │   │   └── OpenApiConfig.java             # Swagger / OpenAPI 3 metadata
-│   │   │   │   ├── SecurityConfig.java            # Security, CORS, H2 Console, Swagger
-│   │   │   ├── config/                            # Configurações
-
-```
-docker compose build --no-cache
-# Rebuild sem cache
-
-docker compose down
-# Parar containers
-
-docker compose logs -f backend
-# Ver logs
-
-docker compose up --build -d
-# Execução em background
-
-docker compose up --build
-# Build e execução
-```bash
-
-### Comandos úteis
-
-```
-      retries: 3
-      start_period: 40s
-      timeout: 10s
-      interval: 30s
-      test: ["CMD", "curl", "-f", "http://localhost:8080/swagger-ui.html"]
-    healthcheck:
-    restart: unless-stopped
-      - SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS=true
-      - SPRING_H2_CONSOLE_ENABLED=true
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - SPRING_DATASOURCE_PASSWORD=
-      - SPRING_DATASOURCE_USERNAME=sa
-      - SPRING_DATASOURCE_URL=jdbc:h2:mem:factory_db
-      - SPRING_PROFILES_ACTIVE=default
-    environment:
-      - "8080:8080"
-    ports:
-    container_name: gestao-industrial-backend
-      dockerfile: Dockerfile
-      context: .
-    build:
-  backend:
-services:
-```yaml
-
-- **Variáveis de ambiente:** configurações do Spring (datasource, JPA, H2 Console)
-- **Restart policy:** `unless-stopped`
-- **Health check:** verifica o Swagger UI a cada 30s
-- **Porta:** `8080:8080`
-- **Container:** `gestao-industrial-backend`
-
-O `docker-compose.yml` configura:
-
-### Docker Compose
-
-| **Runtime** | `eclipse-temurin:21-jre` | Execução da aplicação (imagem leve) |
-| **Build** | `eclipse-temurin:21-jdk` | Compilação do projeto com Maven |
-|---|---|---|
-| Stage | Imagem Base | Finalidade |
-
-### Dockerfile (Multi-stage)
-
-O projeto inclui suporte completo a Docker com **multi-stage build** para otimização do tamanho da imagem.
-
-## 🐳 Docker
-
----
-
-- ✅ Schemas dos DTOs gerados automaticamente
-- ✅ Métodos ordenados por **tipo HTTP** (GET, POST, PUT, DELETE)
-- ✅ Endpoints organizados por **tags** (ordem alfabética)
-- ✅ **Try It Out** habilitado por padrão — teste requisições diretamente pelo navegador
-
-### Funcionalidades do Swagger UI
-
-```
-}
-    }
-                ));
-                        new Server().url("http://localhost:8080").description("Docker")
-                        new Server().url("http://localhost:8080").description("Servidor de Desenvolvimento"),
-                .servers(List.of(
-                        .license(new License().name("MIT")))
-                        .contact(new Contact().name("Equipe Backend").email("contato@example.com"))
-                        .description("API para gerenciamento de insumos e otimização de produção industrial.")
-                        .version("1.0.0")
-                        .title("Gestão Industrial — API REST")
-                .info(new Info()
-        return new OpenAPI()
-    public OpenAPI customOpenAPI() {
-    @Bean
-public class OpenApiConfig {
-@Configuration
-```java
-
-A classe `OpenApiConfig.java` define metadados da API:
-
-### Configuração personalizada
-
-| **OpenAPI JSON** | `/api-docs` | Especificação OpenAPI 3 em formato JSON |
-| **Swagger UI** | `/swagger-ui.html` | Interface interativa para explorar e testar endpoints |
-|---|---|---|
-| Recurso | URL | Descrição |
-
-### Recursos disponíveis
-
-2. Acesse: **[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)**
-1. Inicie a aplicação (local ou via Docker)
-
-### Acessar o Swagger UI
-
-O projeto utiliza **SpringDoc OpenAPI** (`springdoc-openapi-starter-webmvc-ui` v2.8.6) para gerar automaticamente a documentação interativa da API.
-
-## 📖 Swagger / OpenAPI
-
-springdoc.swagger-ui.tryItOutEnabled=true
-springdoc.swagger-ui.tagsSorter=alpha
-springdoc.swagger-ui.operationsSorter=method
-springdoc.swagger-ui.path=/swagger-ui.html
-springdoc.api-docs.path=/api-docs
-# ── Swagger / OpenAPI ──────────────────────────────────
-| API Docs (JSON) | `http://localhost:8080/api-docs` |
-| Swagger UI | `http://localhost:8080/swagger-ui.html` |
-
-```
-docker run -p 8080:8080 --name gestao-industrial-backend gestao-industrial-backend
-# Executar o container
-
-docker build -t gestao-industrial-backend .
-# Build da imagem
-```bash
-
-#### Build e execução manual com Docker
-
-```
-docker compose down
-```bash
-
-#### Parar os containers
-
-```
-docker compose up --build -d
-```bash
-> Para rodar em background (modo detach):
-
-```
-docker compose up --build
-```bash
-
-#### Build e execução com Docker Compose (recomendado)
-
-### Opção 2 — Execução com Docker 🐳
-#### 2. Compilar e executar
-
-### Opção 1 — Execução Local (Maven)
+### Execução local (sem Docker)
 
 - **Java 21** (JDK) — [Download](https://adoptium.net/)
-- **Maven 3.9+** (ou use o Maven Wrapper incluso: `mvnw` / `mvnw.cmd`)
+- **Maven 3.9+** — ou use o Maven Wrapper incluso (`mvnw` / `mvnw.cmd`)
 - **Git**
 
 > ⚠️ Não é necessário instalar banco de dados. O H2 roda em modo embarcado automaticamente.
@@ -256,14 +76,38 @@ docker compose up --build
 
 ## 🚀 Como Rodar
 
-### 1. Clonar o repositório
+### Opção 1 — Docker Compose (recomendado) 🐳
+
+Um único comando constrói e executa tudo:
+
+```bash
+docker compose up --build
+```
+
+> Para rodar em background (modo detach):
+```bash
+docker compose up --build -d
+```
+
+Pronto! Acesse:
+
+| Recurso | URL |
+|---|---|
+| Swagger UI | [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) |
+| API REST | [http://localhost:8080/api/](http://localhost:8080/api/) |
+| Console H2 | [http://localhost:8080/h2-console](http://localhost:8080/h2-console) |
+| API Docs (JSON) | [http://localhost:8080/api-docs](http://localhost:8080/api-docs) |
+
+### Opção 2 — Execução Local (Maven)
+
+#### 1. Clonar o repositório
 
 ```bash
 git clone https://github.com/seu-usuario/teste_pratico_full_stack_PeD.git
 cd teste_pratico_full_stack_PeD/backend
 ```
 
-### 2. Compilar e executar
+#### 2. Compilar e executar
 
 **Windows (PowerShell):**
 ```powershell
@@ -275,12 +119,75 @@ cd teste_pratico_full_stack_PeD/backend
 ./mvnw spring-boot:run
 ```
 
-### 3. Acessar
+#### 3. Acessar
 
 | Recurso | URL |
 |---|---|
-| API REST | `http://localhost:8080/api/` |
-| Console H2 | `http://localhost:8080/h2-console` |
+| Swagger UI | [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) |
+| API REST | [http://localhost:8080/api/](http://localhost:8080/api/) |
+| Console H2 | [http://localhost:8080/h2-console](http://localhost:8080/h2-console) |
+
+---
+
+## 🐳 Docker
+
+O projeto inclui suporte completo a Docker com **multi-stage build** para otimização do tamanho da imagem.
+
+### Dockerfile (Multi-stage)
+
+| Stage | Imagem Base | Finalidade |
+|---|---|---|
+| **Build** | `eclipse-temurin:21-jdk` | Compilação do projeto com Maven Wrapper |
+| **Runtime** | `eclipse-temurin:21-jre` | Execução da aplicação (imagem final leve) |
+
+Características:
+- **Multi-stage build** — imagem final contém apenas o JRE + JAR (sem JDK, sem código-fonte)
+- **HEALTHCHECK** embutido no Dockerfile — verifica `/api-docs` a cada 30s
+- `curl` instalado na imagem runtime para healthcheck funcional
+
+### Docker Compose
+
+O `docker-compose.yml` configura:
+
+- **Container:** `gestao-industrial-backend`
+- **Porta:** `8080:8080`
+- **Restart policy:** `unless-stopped` — reinicia automaticamente em caso de falha
+- **Health check:** verifica o endpoint `/api-docs` a cada 30s (start period: 60s)
+- **Variáveis de ambiente:** datasource H2, JPA, H2 Console habilitado com acesso externo
+
+> ⚠️ Ao utilizar Docker, o H2 Console está habilitado com `SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS=true` para permitir acesso externo ao container.
+
+### Comandos úteis
+
+```bash
+# Build e execução (foreground)
+docker compose up --build
+
+# Build e execução (background)
+docker compose up --build -d
+
+# Ver logs em tempo real
+docker compose logs -f backend
+
+# Parar containers
+docker compose down
+
+# Rebuild sem cache
+docker compose build --no-cache
+
+# Executar testes dentro do container
+docker compose run --rm backend ./mvnw test
+```
+
+### Build e execução manual (sem Docker Compose)
+
+```bash
+# Build da imagem
+docker build -t gestao-industrial-backend .
+
+# Executar o container
+docker run -p 8080:8080 --name gestao-industrial-backend gestao-industrial-backend
+```
 
 ---
 
@@ -306,9 +213,47 @@ spring.jpa.show-sql=true
 spring.h2.console.enabled=true
 spring.h2.console.path=/h2-console
 
+# ── Swagger / OpenAPI ──────────────────────────────────
+springdoc.api-docs.path=/api-docs
+springdoc.swagger-ui.path=/swagger-ui.html
+springdoc.swagger-ui.operationsSorter=method
+springdoc.swagger-ui.tagsSorter=alpha
+springdoc.swagger-ui.tryItOutEnabled=true
+
 # ── Server ──────────────────────────────────────────────
 server.port=8080
 ```
+
+---
+
+## 📖 Swagger / OpenAPI
+
+O projeto utiliza **SpringDoc OpenAPI** (`springdoc-openapi-starter-webmvc-ui` v2.8.6) para gerar automaticamente a documentação interativa da API.
+
+### Acessar o Swagger UI
+
+1. Inicie a aplicação (local ou via Docker)
+2. Acesse: **[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)**
+
+### Recursos disponíveis
+
+| Recurso | URL | Descrição |
+|---|---|---|
+| **Swagger UI** | `/swagger-ui.html` | Interface interativa para explorar e testar endpoints |
+| **OpenAPI JSON** | `/api-docs` | Especificação OpenAPI 3 em formato JSON |
+
+### Funcionalidades do Swagger UI
+
+- ✅ **Try It Out** habilitado por padrão — teste requisições diretamente pelo navegador
+- ✅ Endpoints organizados por **tags** (ordem alfabética): Matérias-Primas, Otimização de Produção, Produtos
+- ✅ Métodos ordenados por **tipo HTTP** (GET, POST, PUT, DELETE)
+- ✅ Schemas dos DTOs gerados automaticamente
+- ✅ Exemplos de request/response em cada endpoint
+- ✅ Documentação detalhada com regras de negócio por endpoint
+
+### Configuração personalizada
+
+A classe `OpenApiConfig.java` define os metadados da API (título, versão, descrição, contato, licença e servidores).
 
 ---
 
@@ -321,58 +266,68 @@ backend/
 ├── src/
 │   ├── main/
 │   │   ├── java/com/example/backend/
-│   │   │   ├── BackendApplication.java            # Classe principal (entry point)
+│   │   │   ├── BackendApplication.java                # Classe principal (entry point)
 │   │   │   │
-│   │   │   ├── config/                            # Configurações (Security, CORS, etc.)
-│   │   │   │   └── SecurityConfig.java
+│   │   │   ├── config/                                # Configurações
+│   │   │   │   ├── SecurityConfig.java                # Security, CORS, H2 Console, Swagger
+│   │   │   │   └── OpenApiConfig.java                 # Swagger / OpenAPI 3 metadata
 │   │   │   │
-│   │   │   ├── entity/                            # Entidades JPA (modelos de domínio)
-│   │   │   │   ├── RawMaterial.java               # Matéria-Prima
-│   │   │   │   ├── Product.java                   # Produto
-│   │   │   │   └── ProductComposition.java        # Composição (Produto ↔ Matéria-Prima)
+│   │   │   ├── entity/                                # Entidades JPA (modelos de domínio)
+│   │   │   │   ├── RawMaterial.java                   # Matéria-Prima
+│   │   │   │   ├── Product.java                       # Produto
+│   │   │   │   └── ProductComposition.java            # Composição (Produto ↔ Matéria-Prima)
 │   │   │   │
-│   │   │   ├── repository/                        # Repositórios Spring Data JPA
+│   │   │   ├── repository/                            # Repositórios Spring Data JPA
 │   │   │   │   ├── RawMaterialRepository.java
 │   │   │   │   ├── ProductRepository.java
 │   │   │   │   └── ProductCompositionRepository.java
 │   │   │   │
-│   │   │   ├── service/                           # Lógica de negócio
+│   │   │   ├── service/                               # Lógica de negócio
 │   │   │   │   ├── RawMaterialService.java
 │   │   │   │   ├── ProductService.java
-│   │   │   │   └── ProductionOptimizerService.java  # ⭐ Algoritmo de otimização
+│   │   │   │   └── ProductionOptimizerService.java    # ⭐ Algoritmo de otimização
 │   │   │   │
-│   │   │   ├── controller/                        # Endpoints REST
+│   │   │   ├── controller/                            # Endpoints REST
 │   │   │   │   ├── RawMaterialController.java
 │   │   │   │   ├── ProductController.java
 │   │   │   │   └── ProductionController.java
 │   │   │   │
-│   │   │   ├── dto/                               # Data Transfer Objects
+│   │   │   ├── dto/                                   # Data Transfer Objects
 │   │   │   │   ├── RawMaterialDTO.java
 │   │   │   │   ├── ProductDTO.java
 │   │   │   │   ├── ProductCompositionDTO.java
 │   │   │   │   └── ProductionSuggestionDTO.java
 │   │   │   │
-│   │   │   └── exception/                         # Tratamento de exceções
+│   │   │   └── exception/                             # Tratamento de exceções
 │   │   │       ├── ResourceNotFoundException.java
 │   │   │       └── GlobalExceptionHandler.java
 │   │   │
 │   │   └── resources/
-│   │       ├── application.properties             # Configurações da aplicação
-│   │       ├── static/                            # Arquivos estáticos (se necessário)
-│   │       └── templates/                         # Templates (se necessário)
+│   │       ├── application.properties                 # Configurações da aplicação
+│   │       ├── static/
+│   │       └── templates/
 │   │
 │   └── test/
 │       └── java/com/example/backend/
-│           ├── BackendApplicationTests.java       # Teste de contexto
+│           ├── BackendApplicationTests.java           # Teste de contexto
 │           ├── service/
-│           │   └── ProductionOptimizerServiceTest.java  # ⭐ Testes do algoritmo
-│           └── controller/
-│               ├── RawMaterialControllerTest.java
-│               └── ProductControllerTest.java
+│           │   ├── RawMaterialServiceTest.java        # 10 testes — CRUD completo
+│           │   ├── ProductServiceTest.java            # 14 testes — CRUD + composições
+│           │   └── ProductionOptimizerServiceTest.java # 15 testes — ⭐ Algoritmo
+│           ├── controller/
+│           │   ├── RawMaterialControllerTest.java     # 9 testes — endpoints + status codes
+│           │   ├── ProductControllerTest.java         # 11 testes — endpoints + composições
+│           │   └── ProductionControllerTest.java      # 3 testes — otimização
+│           └── exception/
+│               ├── GlobalExceptionHandlerTest.java    # 3 testes — 404 e 500
+│               └── ResourceNotFoundExceptionTest.java # 3 testes — exceção customizada
 │
-├── pom.xml                                        # Dependências Maven
-├── mvnw / mvnw.cmd                                # Maven Wrapper
-└── README.md                                      # Este arquivo
+├── Dockerfile                                         # Multi-stage build (JDK → JRE)
+├── docker-compose.yml                                 # Orquestração Docker
+├── .dockerignore                                      # Arquivos ignorados no build Docker
+├── pom.xml                                            # Dependências Maven
+├── mvnw / mvnw.cmd                                    # Maven Wrapper
+└── README.md                                          # Este arquivo
 ```
 
 ---
@@ -393,14 +348,6 @@ classDiagram
             -String code
             -String name
             -Double stockQuantity
-            +getId() Long
-            +getCode() String
-            +getName() String
-            +getStockQuantity() Double
-            +setId(Long id) void
-            +setCode(String code) void
-            +setName(String name) void
-            +setStockQuantity(Double quantity) void
         }
 
         class Product {
@@ -409,16 +356,6 @@ classDiagram
             -String name
             -Double price
             -List~ProductComposition~ compositions
-            +getId() Long
-            +getCode() String
-            +getName() String
-            +getPrice() Double
-            +getCompositions() List~ProductComposition~
-            +setId(Long id) void
-            +setCode(String code) void
-            +setName(String name) void
-            +setPrice(Double price) void
-            +setCompositions(List compositions) void
         }
 
         class ProductComposition {
@@ -426,14 +363,6 @@ classDiagram
             -Product product
             -RawMaterial rawMaterial
             -Double requiredQuantity
-            +getId() Long
-            +getProduct() Product
-            +getRawMaterial() RawMaterial
-            +getRequiredQuantity() Double
-            +setId(Long id) void
-            +setProduct(Product product) void
-            +setRawMaterial(RawMaterial rawMaterial) void
-            +setRequiredQuantity(Double quantity) void
         }
     }
 
@@ -469,7 +398,7 @@ classDiagram
 
         class ProductService {
             -ProductRepository repository
-            -ProductCompositionRepository compositionRepository
+            -RawMaterialRepository rawMaterialRepository
             +findAll() List~Product~
             +findById(Long id) Product
             +create(ProductDTO dto) Product
@@ -481,8 +410,8 @@ classDiagram
             -ProductRepository productRepository
             -RawMaterialRepository rawMaterialRepository
             +optimize() List~ProductionSuggestionDTO~
-            -calculateMaxUnits(Product product, Map stockMap) int
-            -consumeStock(Product product, int units, Map stockMap) void
+            -calculateMaxUnits(Product, Map) int
+            -consumeStock(Product, int, Map) void
         }
     }
 
@@ -542,12 +471,16 @@ classDiagram
     namespace Config {
         class SecurityConfig {
             +securityFilterChain(HttpSecurity http) SecurityFilterChain
+            +corsConfigurationSource() CorsConfigurationSource
+        }
+
+        class OpenApiConfig {
+            +customOpenAPI() OpenAPI
         }
     }
 
     namespace Exception {
         class ResourceNotFoundException {
-            -String message
             +ResourceNotFoundException(String msg)
         }
 
@@ -570,7 +503,7 @@ classDiagram
     %% ── Service → Repository ──
     RawMaterialService --> RawMaterialRepository : uses
     ProductService --> ProductRepository : uses
-    ProductService --> ProductCompositionRepository : uses
+    ProductService --> RawMaterialRepository : uses
     ProductionOptimizerService --> ProductRepository : uses
     ProductionOptimizerService --> RawMaterialRepository : uses
 
@@ -622,15 +555,24 @@ erDiagram
 
 ## 🔗 Endpoints da API
 
-### Matéria-Prima (`/api/raw-materials`)
+> 💡 **Todos os endpoints podem ser explorados e testados diretamente pelo [Swagger UI](http://localhost:8080/swagger-ui.html).**
+
+### Documentação / Swagger
 
 | Método | Endpoint | Descrição |
 |---|---|---|
-| `GET` | `/api/raw-materials` | Listar todas as matérias-primas |
-| `GET` | `/api/raw-materials/{id}` | Buscar por ID |
-| `POST` | `/api/raw-materials` | Cadastrar nova matéria-prima |
-| `PUT` | `/api/raw-materials/{id}` | Atualizar matéria-prima |
-| `DELETE` | `/api/raw-materials/{id}` | Remover matéria-prima |
+| `GET` | `/swagger-ui.html` | Interface interativa Swagger UI |
+| `GET` | `/api-docs` | Especificação OpenAPI 3 (JSON) |
+
+### Matéria-Prima (`/api/raw-materials`)
+
+| Método | Endpoint | Descrição | Status |
+|---|---|---|---|
+| `GET` | `/api/raw-materials` | Listar todas as matérias-primas | `200` |
+| `GET` | `/api/raw-materials/{id}` | Buscar por ID | `200` / `404` |
+| `POST` | `/api/raw-materials` | Cadastrar nova matéria-prima | `201` |
+| `PUT` | `/api/raw-materials/{id}` | Atualizar matéria-prima | `200` / `404` |
+| `DELETE` | `/api/raw-materials/{id}` | Remover matéria-prima | `204` / `404` |
 
 **Exemplo de body (POST/PUT):**
 ```json
@@ -641,17 +583,15 @@ erDiagram
 }
 ```
 
----
-
 ### Produto (`/api/products`)
 
-| Método | Endpoint | Descrição |
-|---|---|---|
-| `GET` | `/api/products` | Listar todos os produtos |
-| `GET` | `/api/products/{id}` | Buscar por ID |
-| `POST` | `/api/products` | Cadastrar novo produto (com composição) |
-| `PUT` | `/api/products/{id}` | Atualizar produto |
-| `DELETE` | `/api/products/{id}` | Remover produto |
+| Método | Endpoint | Descrição | Status |
+|---|---|---|---|
+| `GET` | `/api/products` | Listar todos os produtos | `200` |
+| `GET` | `/api/products/{id}` | Buscar por ID (com composições) | `200` / `404` |
+| `POST` | `/api/products` | Cadastrar novo produto (com composição) | `201` / `404` |
+| `PUT` | `/api/products/{id}` | Atualizar produto (substitui composições) | `200` / `404` |
+| `DELETE` | `/api/products/{id}` | Remover produto (cascata nas composições) | `204` / `404` |
 
 **Exemplo de body (POST/PUT):**
 ```json
@@ -666,35 +606,35 @@ erDiagram
 }
 ```
 
----
-
 ### Otimização de Produção (`/api/production`)
 
-| Método | Endpoint | Descrição |
-|---|---|---|
-| `GET` | `/api/production/optimize` | Calcular sugestão ótima de produção |
+| Método | Endpoint | Descrição | Status |
+|---|---|---|---|
+| `GET` | `/api/production/optimize` | Calcular sugestão ótima de produção | `200` |
+
+**Algoritmo:** Greedy (Guloso) — ordena por preço decrescente, maximiza unidades fabricáveis por produto.
 
 **Exemplo de resposta:**
 ```json
 [
-  {
-    "productCode": "PRD001",
-    "productName": "Bread",
-    "quantity": 5,
-    "unitPrice": 12.50,
-    "totalValue": 62.50
-  },
   {
     "productCode": "PRD003",
     "productName": "Cake",
     "quantity": 2,
     "unitPrice": 35.00,
     "totalValue": 70.00
+  },
+  {
+    "productCode": "PRD001",
+    "productName": "Bread",
+    "quantity": 5,
+    "unitPrice": 12.50,
+    "totalValue": 62.50
   }
 ]
 ```
 
-> 💡 O campo `totalValue` = `quantity × unitPrice`. A soma de todos os `totalValue` é o **valor máximo de venda** que a fábrica pode atingir com o estoque atual.
+> 💡 `totalValue = quantity × unitPrice`. A soma de todos os `totalValue` é o **valor máximo de venda** que a fábrica pode atingir com o estoque atual. O cálculo é feito em memória e **não altera** o estoque real.
 
 ---
 
@@ -705,7 +645,7 @@ O projeto utiliza **H2 Database** em modo embarcado (em memória). Não é neces
 ### Acessar o Console H2
 
 1. Inicie a aplicação
-2. Acesse: `http://localhost:8080/h2-console`
+2. Acesse: [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
 3. Preencha:
    - **JDBC URL:** `jdbc:h2:mem:factory_db`
    - **User:** `sa`
@@ -720,34 +660,53 @@ O projeto utiliza **H2 Database** em modo embarcado (em memória). Não é neces
 | `product` | Produtos |
 | `product_composition` | Relação Produto ↔ Matéria-Prima (N:N com atributo `required_quantity`) |
 
+> ⚠️ Por ser banco em memória, os dados são perdidos ao reiniciar a aplicação.
+
 ---
 
 ## 🧪 Testes
 
 ### Executar todos os testes
 
+**Local:**
 ```powershell
 .\mvnw.cmd test
 ```
 
-### Cobertura de testes esperada
+**Com Docker:**
+```bash
+docker compose run --rm backend ./mvnw test
+```
 
-| Camada | O que testar | Prioridade |
-|---|---|---|
-| `ProductionOptimizerService` | Algoritmo de otimização — cenários de estoque suficiente, conflito de insumos, estoque vazio, produto sem composição | ⭐ Obrigatório |
-| `RawMaterialService` | CRUD — criar, atualizar, buscar, deletar | Recomendado |
-| `ProductService` | CRUD — criar com composição, atualizar, deletar em cascata | Recomendado |
-| `Controllers` | Endpoints REST — status codes, validação de input | Diferencial |
+### Resumo da suíte de testes — 69 testes ✅
+
+| Arquivo | Tipo | Testes | Cobertura |
+|---|---|---|---|
+| `RawMaterialServiceTest` | Unitário (Mockito) | 10 | CRUD completo + cenários de erro (404) |
+| `ProductServiceTest` | Unitário (Mockito) | 14 | CRUD + composições null/vazia/com items + raw material inexistente |
+| `ProductionOptimizerServiceTest` | Unitário (Mockito) | 15 | ⭐ Algoritmo: estoque, gargalo, priorização, conflito, edge cases |
+| `RawMaterialControllerTest` | Integração (MockMvc) | 9 | Endpoints REST + status codes (200, 201, 204, 404) |
+| `ProductControllerTest` | Integração (MockMvc) | 11 | Endpoints REST + composições + status codes |
+| `ProductionControllerTest` | Integração (MockMvc) | 3 | Otimização: múltiplos, único, vazio |
+| `GlobalExceptionHandlerTest` | Unitário | 3 | Respostas 404 e 500 padronizadas |
+| `ResourceNotFoundExceptionTest` | Unitário | 3 | Exceção customizada, herança, mensagem |
+| `BackendApplicationTests` | Contexto Spring | 1 | Verificação de inicialização |
 
 ### Cenários de teste do algoritmo de otimização
 
 ```
-✅ Estoque suficiente para todos os produtos → deve maximizar valor total
-✅ Dois produtos disputam a mesma matéria-prima → deve priorizar o de maior valor
-✅ Estoque insuficiente para qualquer produto → deve retornar lista vazia
-✅ Estoque zerado → deve retornar lista vazia
-✅ Apenas 1 produto possível → deve produzir o máximo possível dele
-✅ Múltiplas matérias-primas como gargalo → deve balancear produção corretamente
+✅ Estoque suficiente para todos os produtos → maximiza valor total
+✅ Dois produtos disputam mesma matéria-prima → prioriza o de maior valor
+✅ Estoque insuficiente para qualquer produto → retorna lista vazia
+✅ Estoque zerado → retorna lista vazia
+✅ Apenas 1 produto possível → produz o máximo possível dele
+✅ Gargalo pela matéria-prima mais escassa → calcula corretamente
+✅ Composição com requiredQuantity zero → ignora composição
+✅ Estoque fracionário → arredonda para baixo (floor)
+✅ Matéria-prima ausente no estoque → retorna 0 unidades
+✅ Produtos com matérias-primas independentes → fabrica ambos
+✅ Composições null → ignora produto
+✅ Sem produtos cadastrados → retorna lista vazia
 ```
 
 ---
@@ -759,14 +718,18 @@ O projeto utiliza **H2 Database** em modo embarcado (em memória). Não é neces
 | **Clean Code** | Nomes de variáveis, métodos e classes em **inglês**, descritivos e concisos |
 | **Layered Architecture** | Separação clara: `Controller → Service → Repository → Entity` |
 | **DTOs** | Objetos de transferência evitam expor entidades JPA diretamente na API |
+| **@JsonIgnore** | Quebra referência circular `Product ↔ ProductComposition` na serialização JSON |
 | **Exception Handling** | `GlobalExceptionHandler` com `@ControllerAdvice` para respostas de erro padronizadas |
-| **Lombok** | `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@Builder` para reduzir boilerplate |
-| **RESTful** | Verbos HTTP corretos (GET, POST, PUT, DELETE) e status codes adequados (200, 201, 204, 404, 400) |
-| **Spring Security** | Configuração para proteger endpoints e permitir CORS com o frontend Vue.js |
+| **Lombok** | `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@Builder` |
+| **RESTful** | Verbos HTTP corretos e status codes adequados (200, 201, 204, 404, 500) |
+| **Spring Security** | CORS habilitado para frontend Vue.js, CSRF desabilitado para API REST |
+| **Swagger/OpenAPI** | Documentação completa por endpoint com exemplos de request/response |
+| **Javadoc** | Documentação em todas as entidades, DTOs, services e controllers |
+| **Docker Multi-stage** | Build otimizado: JDK para compilação, JRE para execução (imagem final menor) |
+| **Testes com Mockito** | Cobertura completa: services (unitário) + controllers (MockMvc) + exceptions |
 
 ---
 
 ## 📄 Licença
 
 Este projeto faz parte de um teste prático para o time de P&D.
-

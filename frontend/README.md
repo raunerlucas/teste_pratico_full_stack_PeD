@@ -378,7 +378,7 @@ export default api
 
 Crie um arquivo `.env` na raiz do frontend:
 ```env
-VITE_API_URL=http://localhost:8080/api
+VITE_API_URL=http:/api
 ```
 
 ### Endpoints Consumidos

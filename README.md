@@ -125,7 +125,7 @@ Sistema completo que permite a um operador de fábrica:
 │   │   ┌───────────────┐ │     │   ┌──────────────────┐  │   │
 │   │   │  Vue.js 3 SPA │ │     │   │  REST Controllers│  │   │
 │   │   │  + Tailwind   │ │     │   │  Services        │  │   │
-│   │   │  + Pinia      │ │────▶│   │  Repositories    │  │   │
+│   │   │  + Pinia      │ │ --> │   │  Repositories    │  │   │
 │   │   │  + Vue Router │ │     │   │  DTOs / Entities │  │   │
 │   │   └───────────────┘ │     │   └──────────────────┘  │   │
 │   │       Porta 80      │     │   ┌──────────────────┐  │   │

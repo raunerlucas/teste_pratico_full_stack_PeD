@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -46,9 +47,11 @@ public class ProductComposition {
      * Produto ao qual esta composição pertence.
      *
      * <p>Carregamento {@code LAZY} — a entidade {@link Product} só é carregada quando acessada.</p>
+     * <p>Anotado com {@code @JsonIgnore} para evitar referência circular na serialização JSON.</p>
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
+    @JsonIgnore
     private Product product;
 
     /**

@@ -1,0 +1,224 @@
+name: CI/CD — Gestão Industrial
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# ──────────────────────────────────────────────────────────────
+# Jobs
+# ──────────────────────────────────────────────────────────────
+jobs:
+
+  # ════════════════════════════════════════════════════════════
+  # 1. Back-end — Build + Testes
+  # ════════════════════════════════════════════════════════════
+  backend-test:
+    name: ☕ Backend — Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: 📦 Install dependencies
+        run: ./mvnw dependency:resolve -B
+
+      - name: 🔨 Build
+        run: ./mvnw clean package -DskipTests -B
+
+      - name: 🧪 Run tests
+        run: ./mvnw test -B
+
+      - name: 📊 Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: backend/target/surefire-reports/
+          retention-days: 7
+
+      - name: 📦 Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
+          retention-days: 3
+
+  # ════════════════════════════════════════════════════════════
+  # 2. Front-end — Build + Testes
+  # ════════════════════════════════════════════════════════════
+  frontend-test:
+    name: 💚 Frontend — Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🧪 Run tests
+        run: npm test
+
+      - name: 🔨 Build production
+        run: npm run build
+
+      - name: 📦 Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 3
+
+  # ════════════════════════════════════════════════════════════
+  # 3. Docker — Build das imagens
+  # ════════════════════════════════════════════════════════════
+  docker-build:
+    name: 🐳 Docker — Build Images
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend-test]
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐳 Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔨 Build Backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: false
+          tags: gestao-industrial-backend:latest
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: 🔨 Build Frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: false
+          tags: gestao-industrial-frontend:latest
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+  # ════════════════════════════════════════════════════════════
+  # 4. Docker Compose — Integration test
+  # ════════════════════════════════════════════════════════════
+  integration-test:
+    name: 🔗 Integration — Docker Compose
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐳 Start services
+        run: docker compose up -d --build
+
+      - name: ⏳ Wait for backend health
+        run: |
+          echo "Waiting for backend to be healthy..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8080/api-docs > /dev/null 2>&1; then
+              echo "✅ Backend is healthy!"
+              exit 0
+            fi
+            echo "Attempt $i/30 — waiting 5s..."
+            sleep 5
+          done
+          echo "❌ Backend failed to start within 150s"
+          docker compose logs backend --tail=30
+          exit 1
+
+      - name: ⏳ Wait for frontend health
+        run: |
+          echo "Waiting for frontend to be healthy..."
+          for i in $(seq 1 15); do
+            if curl -sf http://localhost:80 > /dev/null 2>&1; then
+              echo "✅ Frontend is healthy!"
+              exit 0
+            fi
+            echo "Attempt $i/15 — waiting 3s..."
+            sleep 3
+          done
+          echo "❌ Frontend failed to start within 45s"
+          docker compose logs frontend --tail=30
+          exit 1
+
+      - name: 🧪 Smoke test — API endpoints
+        run: |
+          set -e
+
+          echo "=== Testing API directly (port 8080) ==="
+
+          echo "GET /api/raw-materials"
+          curl -sf http://localhost:8080/api/raw-materials | python3 -m json.tool | head -20
+          echo ""
+
+          echo "GET /api/products"
+          curl -sf http://localhost:8080/api/products | python3 -m json.tool | head -20
+          echo ""
+
+          echo "GET /api/production/optimize"
+          curl -sf http://localhost:8080/api/production/optimize | python3 -m json.tool | head -20
+          echo ""
+
+          echo "=== Testing via Nginx proxy (port 80) ==="
+
+          echo "GET /api/raw-materials (via proxy)"
+          curl -sf http://localhost/api/raw-materials | python3 -m json.tool | head -20
+          echo ""
+
+          echo "GET /api/products (via proxy)"
+          curl -sf http://localhost/api/products | python3 -m json.tool | head -20
+          echo ""
+
+          echo "GET /api/production/optimize (via proxy)"
+          curl -sf http://localhost/api/production/optimize | python3 -m json.tool | head -20
+          echo ""
+
+          echo "✅ All smoke tests passed!"
+
+      - name: 📋 Show container status
+        if: always()
+        run: docker compose ps
+
+      - name: 📋 Show container logs
+        if: failure()
+        run: docker compose logs --tail=50
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: docker compose down -v

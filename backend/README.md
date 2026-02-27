@@ -1,6 +1,6 @@
 # 🏭 Backend — Gestão Industrial (API REST)
 
-API REST para gerenciamento de insumos e otimização de produção industrial, desenvolvida com **Spring Boot 4**, **Java 21**, **H2 Database** e **Spring Security**.
+API REST para gerenciamento de insumos e otimização de produção industrial, desenvolvida com **Spring Boot 4**, **Java 21**, **H2 Database**, **Spring Security**, **Swagger/OpenAPI 3** e **Docker**.
 
 ---
 
@@ -11,6 +11,8 @@ API REST para gerenciamento de insumos e otimização de produção industrial, 
 - [Pré-requisitos](#-pré-requisitos)
 - [Como Rodar](#-como-rodar)
 - [Configuração](#-configuração)
+- [Docker](#-docker)
+- [Swagger / OpenAPI](#-swagger--openapi)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
 - [Diagrama de Classes (Mermaid)](#-diagrama-de-classes)
 - [Endpoints da API](#-endpoints-da-api)
@@ -26,6 +28,8 @@ O backend é responsável por:
 
 1. **CRUD de Matérias-Primas (Raw Materials)** — cadastro, edição, listagem e remoção de insumos com controle de estoque.
 2. **CRUD de Produtos (Products)** — cadastro, edição, listagem e remoção de produtos, incluindo a composição (quais matérias-primas e quantidades são necessárias para fabricar 1 unidade).
+6. **Containerização** — Dockerfile multi-stage e Docker Compose para execução isolada e reprodutível.
+5. **Documentação interativa** — Swagger UI com OpenAPI 3 para explorar e testar todos os endpoints diretamente pelo navegador.
 3. **Cálculo de Otimização de Produção** — algoritmo que analisa o estoque atual de matérias-primas e sugere **quais produtos fabricar e em que quantidade** para obter o **maior valor total de venda**, resolvendo conflitos quando dois ou mais produtos disputam a mesma matéria-prima.
 4. **Segurança** — camada de autenticação/autorização via Spring Security.
 
@@ -36,18 +40,211 @@ O backend é responsável por:
 | Tecnologia | Versão | Finalidade |
 |---|---|---|
 | **Java** | 21 | Linguagem principal |
+| **SpringDoc OpenAPI** | 2.8.6 | Documentação Swagger UI / OpenAPI 3 |
 | **Spring Boot** | 4.0.3 | Framework backend |
 | **Spring Data JPA** | — | Persistência e ORM (Hibernate) |
+| **Docker Compose** | — | Orquestração de containers |
+| **Docker** | — | Containerização da aplicação |
 | **Spring Security** | — | Autenticação e autorização |
 | **Spring Web MVC** | — | Exposição de endpoints REST |
 | **H2 Database** | runtime | Banco relacional embarcado |
 | **Lombok** | — | Redução de boilerplate (getters, setters, builders) |
+### Execução local (sem Docker)
 | **Spring Boot DevTools** | runtime | Hot-reload em desenvolvimento |
 | **JUnit 5 + Spring Test** | test | Testes unitários e de integração |
 
+
+- **Docker Compose** — incluído no Docker Desktop
+- **Docker** — [Download](https://docs.docker.com/get-docker/)
+### Execução com Docker
 ---
 
-## 📋 Pré-requisitos
+| **Docker Multi-stage** | Build otimizado: JDK para compilação, JRE para execução (imagem final menor) |
+| **Swagger / OpenAPI 3** | Documentação interativa auto-gerada com SpringDoc OpenAPI |
+
+```
+docker compose run --rm backend ./mvnw test
+```bash
+**Com Docker:**
+
+> ⚠️ Ao utilizar Docker, o H2 Console está habilitado com `SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS=true` para permitir acesso externo ao container.
+
+---
+
+| `GET` | `/api-docs` | Especificação OpenAPI 3 (JSON) |
+| `GET` | `/swagger-ui.html` | Interface interativa Swagger UI |
+|---|---|---|
+| Método | Endpoint | Descrição |
+
+### Documentação / Swagger
+
+> 💡 **Todos os endpoints podem ser explorados e testados diretamente pelo [Swagger UI](http://localhost:8080/swagger-ui.html).**
+            +customOpenAPI() OpenAPI
+        class OpenApiConfig {
+
+        }
+            +corsConfigurationSource() CorsConfigurationSource
+├── docker-compose.yml                             # Orquestração Docker
+├── Dockerfile                                     # Multi-stage build (JDK → JRE)
+│   │   │   │   └── OpenApiConfig.java             # Swagger / OpenAPI 3 metadata
+│   │   │   │   ├── SecurityConfig.java            # Security, CORS, H2 Console, Swagger
+│   │   │   ├── config/                            # Configurações
+
+```
+docker compose build --no-cache
+# Rebuild sem cache
+
+docker compose down
+# Parar containers
+
+docker compose logs -f backend
+# Ver logs
+
+docker compose up --build -d
+# Execução em background
+
+docker compose up --build
+# Build e execução
+```bash
+
+### Comandos úteis
+
+```
+      retries: 3
+      start_period: 40s
+      timeout: 10s
+      interval: 30s
+      test: ["CMD", "curl", "-f", "http://localhost:8080/swagger-ui.html"]
+    healthcheck:
+    restart: unless-stopped
+      - SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS=true
+      - SPRING_H2_CONSOLE_ENABLED=true
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_DATASOURCE_PASSWORD=
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:factory_db
+      - SPRING_PROFILES_ACTIVE=default
+    environment:
+      - "8080:8080"
+    ports:
+    container_name: gestao-industrial-backend
+      dockerfile: Dockerfile
+      context: .
+    build:
+  backend:
+services:
+```yaml
+
+- **Variáveis de ambiente:** configurações do Spring (datasource, JPA, H2 Console)
+- **Restart policy:** `unless-stopped`
+- **Health check:** verifica o Swagger UI a cada 30s
+- **Porta:** `8080:8080`
+- **Container:** `gestao-industrial-backend`
+
+O `docker-compose.yml` configura:
+
+### Docker Compose
+
+| **Runtime** | `eclipse-temurin:21-jre` | Execução da aplicação (imagem leve) |
+| **Build** | `eclipse-temurin:21-jdk` | Compilação do projeto com Maven |
+|---|---|---|
+| Stage | Imagem Base | Finalidade |
+
+### Dockerfile (Multi-stage)
+
+O projeto inclui suporte completo a Docker com **multi-stage build** para otimização do tamanho da imagem.
+
+## 🐳 Docker
+
+---
+
+- ✅ Schemas dos DTOs gerados automaticamente
+- ✅ Métodos ordenados por **tipo HTTP** (GET, POST, PUT, DELETE)
+- ✅ Endpoints organizados por **tags** (ordem alfabética)
+- ✅ **Try It Out** habilitado por padrão — teste requisições diretamente pelo navegador
+
+### Funcionalidades do Swagger UI
+
+```
+}
+    }
+                ));
+                        new Server().url("http://localhost:8080").description("Docker")
+                        new Server().url("http://localhost:8080").description("Servidor de Desenvolvimento"),
+                .servers(List.of(
+                        .license(new License().name("MIT")))
+                        .contact(new Contact().name("Equipe Backend").email("contato@example.com"))
+                        .description("API para gerenciamento de insumos e otimização de produção industrial.")
+                        .version("1.0.0")
+                        .title("Gestão Industrial — API REST")
+                .info(new Info()
+        return new OpenAPI()
+    public OpenAPI customOpenAPI() {
+    @Bean
+public class OpenApiConfig {
+@Configuration
+```java
+
+A classe `OpenApiConfig.java` define metadados da API:
+
+### Configuração personalizada
+
+| **OpenAPI JSON** | `/api-docs` | Especificação OpenAPI 3 em formato JSON |
+| **Swagger UI** | `/swagger-ui.html` | Interface interativa para explorar e testar endpoints |
+|---|---|---|
+| Recurso | URL | Descrição |
+
+### Recursos disponíveis
+
+2. Acesse: **[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)**
+1. Inicie a aplicação (local ou via Docker)
+
+### Acessar o Swagger UI
+
+O projeto utiliza **SpringDoc OpenAPI** (`springdoc-openapi-starter-webmvc-ui` v2.8.6) para gerar automaticamente a documentação interativa da API.
+
+## 📖 Swagger / OpenAPI
+
+springdoc.swagger-ui.tryItOutEnabled=true
+springdoc.swagger-ui.tagsSorter=alpha
+springdoc.swagger-ui.operationsSorter=method
+springdoc.swagger-ui.path=/swagger-ui.html
+springdoc.api-docs.path=/api-docs
+# ── Swagger / OpenAPI ──────────────────────────────────
+| API Docs (JSON) | `http://localhost:8080/api-docs` |
+| Swagger UI | `http://localhost:8080/swagger-ui.html` |
+
+```
+docker run -p 8080:8080 --name gestao-industrial-backend gestao-industrial-backend
+# Executar o container
+
+docker build -t gestao-industrial-backend .
+# Build da imagem
+```bash
+
+#### Build e execução manual com Docker
+
+```
+docker compose down
+```bash
+
+#### Parar os containers
+
+```
+docker compose up --build -d
+```bash
+> Para rodar em background (modo detach):
+
+```
+docker compose up --build
+```bash
+
+#### Build e execução com Docker Compose (recomendado)
+
+### Opção 2 — Execução com Docker 🐳
+#### 2. Compilar e executar
+
+### Opção 1 — Execução Local (Maven)
 
 - **Java 21** (JDK) — [Download](https://adoptium.net/)
 - **Maven 3.9+** (ou use o Maven Wrapper incluso: `mvnw` / `mvnw.cmd`)

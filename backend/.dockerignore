@@ -2,7 +2,7 @@ target/
 .git/
 .gitignore
 *.md
-.mvn/wrapper/maven-wrapper.jar
 .idea/
+.vscode/
 *.iml
 *.log

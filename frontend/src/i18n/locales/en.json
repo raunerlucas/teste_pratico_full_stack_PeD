@@ -1,0 +1,107 @@
+{
+  "app": {
+    "title": "Industrial Management",
+    "subtitle": "Supply Management and Production Optimization"
+  },
+  "nav": {
+    "home": "Home",
+    "rawMaterials": "Raw Materials",
+    "products": "Products",
+    "production": "Production Optimization"
+  },
+  "common": {
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back",
+    "new": "New",
+    "search": "Search",
+    "loading": "Loading...",
+    "noData": "No records found.",
+    "success": "Operation completed successfully!",
+    "error": "An error occurred. Please try again.",
+    "confirmDelete": "Are you sure you want to delete this record?",
+    "confirmDeleteTitle": "Confirm Deletion",
+    "yes": "Yes",
+    "no": "No",
+    "code": "Code",
+    "name": "Name",
+    "required": "Required field",
+    "invalidValue": "Invalid value"
+  },
+  "home": {
+    "welcome": "Welcome to the Industrial Management System",
+    "description": "Manage raw materials, products, and optimize your production for maximum sales value.",
+    "rawMaterialsCount": "Raw Materials",
+    "productsCount": "Products",
+    "optimizeProduction": "Optimize Production",
+    "quickActions": "Quick Actions",
+    "newRawMaterial": "New Raw Material",
+    "newProduct": "New Product",
+    "viewOptimization": "View Optimization",
+    "overview": "Overview"
+  },
+  "rawMaterial": {
+    "title": "Raw Materials",
+    "new": "New Raw Material",
+    "edit": "Edit Raw Material",
+    "code": "Code",
+    "name": "Name",
+    "stockQuantity": "Stock Quantity",
+    "codePlaceholder": "E.g.: MP001",
+    "namePlaceholder": "E.g.: Wheat Flour",
+    "stockPlaceholder": "E.g.: 500",
+    "deleteConfirm": "Are you sure you want to delete the raw material \"{name}\"?",
+    "created": "Raw material created successfully!",
+    "updated": "Raw material updated successfully!",
+    "deleted": "Raw material deleted successfully!"
+  },
+  "product": {
+    "title": "Products",
+    "new": "New Product",
+    "edit": "Edit Product",
+    "code": "Code",
+    "name": "Name",
+    "price": "Price ($)",
+    "compositions": "Composition",
+    "compositionCount": "No. of Materials",
+    "codePlaceholder": "E.g.: PRD001",
+    "namePlaceholder": "E.g.: French Bread",
+    "pricePlaceholder": "E.g.: 12.50",
+    "addComposition": "Add Material",
+    "removeComposition": "Remove",
+    "selectRawMaterial": "Select a raw material",
+    "requiredQuantity": "Required Qty.",
+    "quantityPlaceholder": "E.g.: 200",
+    "noCompositions": "No compositions added.",
+    "deleteConfirm": "Are you sure you want to delete the product \"{name}\"?",
+    "created": "Product created successfully!",
+    "updated": "Product updated successfully!",
+    "deleted": "Product deleted successfully!"
+  },
+  "production": {
+    "title": "Production Optimization",
+    "optimize": "Calculate Optimal Production",
+    "optimizing": "Calculating...",
+    "stockOverview": "Current Stock",
+    "result": "Optimization Result",
+    "summary": "Summary",
+    "productCode": "Product Code",
+    "productName": "Product",
+    "quantity": "Quantity",
+    "unitPrice": "Unit Price",
+    "totalValue": "Total Value",
+    "grandTotal": "Total Sales Value",
+    "suggestedProducts": "Suggested Products",
+    "noSuggestions": "No production suggestions available with current stock.",
+    "description": "Analyze current stock and discover which products to manufacture for maximum total sales value."
+  },
+  "footer": {
+    "text": "Full Stack Practical Test — R&D",
+    "rights": "All rights reserved."
+  }
+}
+

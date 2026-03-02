@@ -48,7 +48,7 @@ class ProductControllerTest {
     // ── Helpers ─────────────────────────────────────────────────────────────────
 
     private RawMaterial buildRawMaterial(Long id, String code, String name, Double stock) {
-        return RawMaterial.builder().id(id).code(code).name(name).stockQuantity(stock).build();
+        return RawMaterial.builder().id(id).code(code).name(name).stockQuantity(stock).unitOfMeasure("kg").build();
     }
 
     private Product buildProductWithComposition() {

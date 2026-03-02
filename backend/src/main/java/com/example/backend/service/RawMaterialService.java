@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import com.example.backend.dto.RawMaterialDTO;
 import com.example.backend.entity.RawMaterial;
+import com.example.backend.exception.DuplicateCodeException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.RawMaterialRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,25 @@ public class RawMaterialService {
     }
 
     /**
+     * Generates the next sequential code following the pattern MP001, MP002, ..., MP999.
+     *
+     * <p>Queries the database for the highest existing code with the "MP" prefix,
+     * extracts the numeric suffix, increments it, and returns the next code
+     * zero-padded to 3 digits.</p>
+     *
+     * @return the next available code (e.g. "MP006" if the last was "MP005")
+     */
+    public String generateNextCode() {
+        return repository.findMaxCodeWithPrefix()
+                .map(maxCode -> {
+                    String numericPart = maxCode.replaceAll("\\D+", "");
+                    int nextNumber = Integer.parseInt(numericPart) + 1;
+                    return String.format("MP%03d", nextNumber);
+                })
+                .orElse("MP001");
+    }
+
+    /**
      * Busca uma matéria-prima pelo seu identificador único.
      *
      * @param id identificador da matéria-prima
@@ -59,10 +79,16 @@ public class RawMaterialService {
      */
     @Transactional
     public RawMaterial create(RawMaterialDTO dto) {
+        if (repository.existsByCode(dto.getCode())) {
+            throw new DuplicateCodeException(
+                    "Raw material with code '" + dto.getCode() + "' already exists. Please use a different code.");
+        }
+
         RawMaterial rawMaterial = RawMaterial.builder()
                 .code(dto.getCode())
                 .name(dto.getName())
                 .stockQuantity(dto.getStockQuantity())
+                .unitOfMeasure(dto.getUnitOfMeasure() != null ? dto.getUnitOfMeasure() : "kg")
                 .build();
 
         return repository.save(rawMaterial);
@@ -82,9 +108,16 @@ public class RawMaterialService {
     public RawMaterial update(Long id, RawMaterialDTO dto) {
         RawMaterial rawMaterial = findById(id);
 
+        // Check if the new code conflicts with another existing raw material
+        if (!rawMaterial.getCode().equals(dto.getCode()) && repository.existsByCode(dto.getCode())) {
+            throw new DuplicateCodeException(
+                    "Raw material with code '" + dto.getCode() + "' already exists. Please use a different code.");
+        }
+
         rawMaterial.setCode(dto.getCode());
         rawMaterial.setName(dto.getName());
         rawMaterial.setStockQuantity(dto.getStockQuantity());
+        rawMaterial.setUnitOfMeasure(dto.getUnitOfMeasure() != null ? dto.getUnitOfMeasure() : rawMaterial.getUnitOfMeasure());
 
         return repository.save(rawMaterial);
     }

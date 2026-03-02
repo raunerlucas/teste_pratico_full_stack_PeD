@@ -91,13 +91,15 @@ public class RawMaterialController {
                                         "id": 1,
                                         "code": "MP001",
                                         "name": "Farinha de Trigo",
-                                        "stockQuantity": 500.0
+                                        "stockQuantity": 500.0,
+                                        "unitOfMeasure": "kg"
                                       },
                                       {
                                         "id": 2,
                                         "code": "MP002",
                                         "name": "Leite",
-                                        "stockQuantity": 200.0
+                                        "stockQuantity": 200.0,
+                                        "unitOfMeasure": "caixas"
                                       }
                                     ]
                                     """)
@@ -106,6 +108,43 @@ public class RawMaterialController {
     })
     public ResponseEntity<List<RawMaterial>> getAll() {
         return ResponseEntity.ok(service.findAll());
+    }
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // GET /api/raw-materials/next-code — Gerar próximo código sequencial
+    // ────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Returns the next available sequential code for a new raw material.
+     *
+     * <p>The code follows the pattern {@code MP001}, {@code MP002}, etc.
+     * If the last registered code is {@code MP005}, this endpoint returns {@code MP006}.</p>
+     *
+     * @return {@code 200 OK} with the next code as a JSON object
+     */
+    @GetMapping("/next-code")
+    @Operation(
+            summary = "Gerar próximo código sequencial",
+            description = """
+                    Retorna o próximo código disponível para cadastro de matéria-prima,
+                    seguindo o padrão `MP001`, `MP002`, etc.
+
+                    Exemplo: se o último código cadastrado é `MP005`, retorna `MP006`.
+                    """
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Próximo código gerado com sucesso",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(value = """
+                            { "nextCode": "MP006" }
+                            """)
+            )
+    )
+    public ResponseEntity<java.util.Map<String, String>> getNextCode() {
+        String nextCode = service.generateNextCode();
+        return ResponseEntity.ok(java.util.Map.of("nextCode", nextCode));
     }
 
     // ────────────────────────────────────────────────────────────────────────────
@@ -141,7 +180,8 @@ public class RawMaterialController {
                                       "id": 1,
                                       "code": "MP001",
                                       "name": "Farinha de Trigo",
-                                      "stockQuantity": 500.0
+                                      "stockQuantity": 500.0,
+                                      "unitOfMeasure": "kg"
                                     }
                                     """)
                     )
@@ -192,7 +232,8 @@ public class RawMaterialController {
                     - `code` — código único (ex.: `"MP001"`). Não pode ser repetido.
                     - `name` — nome descritivo (ex.: `"Farinha de Trigo"`).
                     - `stockQuantity` — quantidade em estoque (ex.: `500.0`).
-                    
+                    - `unitOfMeasure` — unidade de medida (ex.: `"kg"`, `"g"`, `"ton"`, `"caixas"`).
+
                     **Regras:**
                     - O `id` é gerado automaticamente pelo banco e retornado na resposta.
                     - Se o `code` já existir, retorna erro de constraint violation.
@@ -210,7 +251,8 @@ public class RawMaterialController {
                                       "id": 1,
                                       "code": "MP001",
                                       "name": "Farinha de Trigo",
-                                      "stockQuantity": 500.0
+                                      "stockQuantity": 500.0,
+                                      "unitOfMeasure": "kg"
                                     }
                                     """)
                     )
@@ -241,7 +283,8 @@ public class RawMaterialController {
                             {
                               "code": "MP001",
                               "name": "Farinha de Trigo",
-                              "stockQuantity": 500.0
+                              "stockQuantity": 500.0,
+                              "unitOfMeasure": "kg"
                             }
                             """)
             )
@@ -275,7 +318,8 @@ public class RawMaterialController {
                     - `code` — novo código (ou manter o mesmo).
                     - `name` — novo nome.
                     - `stockQuantity` — nova quantidade em estoque.
-                    
+                    - `unitOfMeasure` — unidade de medida.
+
                     **Regras:**
                     - Se o `id` não existir, retorna `404 Not Found`.
                     - Se o novo `code` conflitar com outra matéria-prima, retorna erro de constraint.
@@ -293,7 +337,8 @@ public class RawMaterialController {
                                       "id": 1,
                                       "code": "MP001",
                                       "name": "Farinha de Trigo Integral",
-                                      "stockQuantity": 750.0
+                                      "stockQuantity": 750.0,
+                                      "unitOfMeasure": "kg"
                                     }
                                     """)
                     )
@@ -324,7 +369,8 @@ public class RawMaterialController {
                             {
                               "code": "MP001",
                               "name": "Farinha de Trigo Integral",
-                              "stockQuantity": 750.0
+                              "stockQuantity": 750.0,
+                              "unitOfMeasure": "kg"
                             }
                             """)
             )

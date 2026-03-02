@@ -59,6 +59,7 @@ public class DataLoader implements CommandLineRunner {
                         .code("MP001")
                         .name("Farinha de Trigo")
                         .stockQuantity(1000.0)
+                        .unitOfMeasure("kg")
                         .build()
         );
 
@@ -67,6 +68,7 @@ public class DataLoader implements CommandLineRunner {
                         .code("MP002")
                         .name("Açúcar")
                         .stockQuantity(500.0)
+                        .unitOfMeasure("kg")
                         .build()
         );
 
@@ -75,6 +77,7 @@ public class DataLoader implements CommandLineRunner {
                         .code("MP003")
                         .name("Leite")
                         .stockQuantity(300.0)
+                        .unitOfMeasure("caixas")
                         .build()
         );
 
@@ -83,6 +86,7 @@ public class DataLoader implements CommandLineRunner {
                         .code("MP004")
                         .name("Ovos")
                         .stockQuantity(200.0)
+                        .unitOfMeasure("caixas")
                         .build()
         );
 
@@ -91,6 +95,7 @@ public class DataLoader implements CommandLineRunner {
                         .code("MP005")
                         .name("Manteiga")
                         .stockQuantity(150.0)
+                        .unitOfMeasure("kg")
                         .build()
         );
 

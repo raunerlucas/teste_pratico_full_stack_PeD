@@ -5,6 +5,7 @@ import com.example.backend.dto.ProductDTO;
 import com.example.backend.entity.Product;
 import com.example.backend.entity.ProductComposition;
 import com.example.backend.entity.RawMaterial;
+import com.example.backend.exception.DuplicateCodeException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.ProductRepository;
 import com.example.backend.repository.RawMaterialRepository;
@@ -44,7 +45,7 @@ class ProductServiceTest {
 
     private RawMaterial buildRawMaterial(Long id, String code, String name, Double stock) {
         return RawMaterial.builder()
-                .id(id).code(code).name(name).stockQuantity(stock)
+                .id(id).code(code).name(name).stockQuantity(stock).unitOfMeasure("kg")
                 .build();
     }
 
@@ -222,6 +223,20 @@ class ProductServiceTest {
             assertThat(result.getCompositions()).isEmpty();
             verify(rawMaterialRepository, never()).findById(anyLong());
         }
+
+        @Test
+        @DisplayName("Deve lançar DuplicateCodeException ao criar produto com código já existente")
+        void shouldThrowDuplicateCodeExceptionWhenCodeExists() {
+            ProductDTO dto = buildProductDTO("PRD001", "Pão", 12.50, null);
+            when(repository.existsByCode("PRD001")).thenReturn(true);
+
+            assertThatThrownBy(() -> service.create(dto))
+                    .isInstanceOf(DuplicateCodeException.class)
+                    .hasMessageContaining("PRD001")
+                    .hasMessageContaining("already exists");
+
+            verify(repository, never()).save(any());
+        }
     }
 
     // ── update ──────────────────────────────────────────────────────────────────
@@ -266,6 +281,22 @@ class ProductServiceTest {
             assertThatThrownBy(() -> service.update(99L, dto))
                     .isInstanceOf(ResourceNotFoundException.class)
                     .hasMessageContaining("Product not found with id: 99");
+
+            verify(repository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Deve lançar DuplicateCodeException ao atualizar com código de outro produto")
+        void shouldThrowDuplicateCodeExceptionWhenUpdatingToExistingCode() {
+            Product existing = buildProduct(1L, "PRD001", "Pão", 12.50);
+            ProductDTO dto = buildProductDTO("PRD002", "Pão Atualizado", 15.00, null);
+            when(repository.findById(1L)).thenReturn(Optional.of(existing));
+            when(repository.existsByCode("PRD002")).thenReturn(true);
+
+            assertThatThrownBy(() -> service.update(1L, dto))
+                    .isInstanceOf(DuplicateCodeException.class)
+                    .hasMessageContaining("PRD002")
+                    .hasMessageContaining("already exists");
 
             verify(repository, never()).save(any());
         }

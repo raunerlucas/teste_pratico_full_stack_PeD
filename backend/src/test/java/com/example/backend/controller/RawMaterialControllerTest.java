@@ -45,7 +45,7 @@ class RawMaterialControllerTest {
 
     private RawMaterial buildRawMaterial(Long id, String code, String name, Double stock) {
         return RawMaterial.builder()
-                .id(id).code(code).name(name).stockQuantity(stock)
+                .id(id).code(code).name(name).stockQuantity(stock).unitOfMeasure("kg")
                 .build();
     }
 

@@ -5,6 +5,7 @@ import com.example.backend.dto.ProductDTO;
 import com.example.backend.entity.Product;
 import com.example.backend.entity.ProductComposition;
 import com.example.backend.entity.RawMaterial;
+import com.example.backend.exception.DuplicateCodeException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.ProductRepository;
 import com.example.backend.repository.RawMaterialRepository;
@@ -73,6 +74,11 @@ public class ProductService {
      */
     @Transactional
     public Product create(ProductDTO dto) {
+        if (repository.existsByCode(dto.getCode())) {
+            throw new DuplicateCodeException(
+                    "Product with code '" + dto.getCode() + "' already exists. Please use a different code.");
+        }
+
         Product product = Product.builder()
                 .code(dto.getCode())
                 .name(dto.getName())
@@ -113,6 +119,12 @@ public class ProductService {
     @Transactional
     public Product update(Long id, ProductDTO dto) {
         Product product = findById(id);
+
+        // Check if the new code conflicts with another existing product
+        if (!product.getCode().equals(dto.getCode()) && repository.existsByCode(dto.getCode())) {
+            throw new DuplicateCodeException(
+                    "Product with code '" + dto.getCode() + "' already exists. Please use a different code.");
+        }
 
         product.setCode(dto.getCode());
         product.setName(dto.getName());

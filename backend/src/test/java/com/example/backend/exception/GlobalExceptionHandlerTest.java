@@ -30,8 +30,36 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("handleGeneral — Deve retornar 500 com corpo padronizado")
-    void shouldReturn500WithStandardBody() {
+    @DisplayName("handleDuplicateCode — Deve retornar 409 com mensagem de código duplicado")
+    void shouldReturn409ForDuplicateCode() {
+        DuplicateCodeException ex = new DuplicateCodeException("Raw material with code 'MP001' already exists.");
+
+        ResponseEntity<Map<String, Object>> response = handler.handleDuplicateCode(ex);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().get("status")).isEqualTo(409);
+        assertThat(response.getBody().get("error")).isEqualTo("Conflict");
+        assertThat(response.getBody().get("message")).isEqualTo("Raw material with code 'MP001' already exists.");
+    }
+
+    @Test
+    @DisplayName("handleBadRequest — Deve retornar 400 com mensagem descritiva")
+    void shouldReturn400ForBadRequest() {
+        IllegalArgumentException ex = new IllegalArgumentException("Invalid value");
+
+        ResponseEntity<Map<String, Object>> response = handler.handleBadRequest(ex);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().get("status")).isEqualTo(400);
+        assertThat(response.getBody().get("error")).isEqualTo("Bad Request");
+        assertThat(response.getBody().get("message")).isEqualTo("Invalid value");
+    }
+
+    @Test
+    @DisplayName("handleGeneral — Deve retornar 500 com mensagem genérica segura")
+    void shouldReturn500WithSafeMessage() {
         Exception ex = new RuntimeException("Erro inesperado");
 
         ResponseEntity<Map<String, Object>> response = handler.handleGeneral(ex);
@@ -40,18 +68,32 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().get("status")).isEqualTo(500);
         assertThat(response.getBody().get("error")).isEqualTo("Internal Server Error");
-        assertThat(response.getBody().get("message")).isEqualTo("Erro inesperado");
-        assertThat(response.getBody()).containsKey("timestamp");
+        assertThat(response.getBody().get("message")).isEqualTo("An unexpected error occurred. Please try again later.");
     }
 
     @Test
-    @DisplayName("handleNotFound — Deve incluir timestamp no corpo da resposta")
+    @DisplayName("handleGeneral — Deve desembrulhar DuplicateCodeException aninhada e retornar 409")
+    void shouldUnwrapNestedDuplicateCodeException() {
+        DuplicateCodeException cause = new DuplicateCodeException("Raw material with code 'MP001' already exists.");
+        Exception wrapper = new RuntimeException("Transaction failed", cause);
+
+        ResponseEntity<Map<String, Object>> response = handler.handleGeneral(wrapper);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().get("status")).isEqualTo(409);
+        assertThat(response.getBody().get("message")).isEqualTo("Raw material with code 'MP001' already exists.");
+    }
+
+    @Test
+    @DisplayName("handleNotFound — Deve incluir timestamp como String no corpo da resposta")
     void shouldIncludeTimestamp() {
         ResourceNotFoundException ex = new ResourceNotFoundException("test");
 
         ResponseEntity<Map<String, Object>> response = handler.handleNotFound(ex);
 
         assertThat(response.getBody().get("timestamp")).isNotNull();
+        assertThat(response.getBody().get("timestamp")).isInstanceOf(String.class);
     }
 }
 

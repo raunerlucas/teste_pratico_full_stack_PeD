@@ -50,9 +50,16 @@ public class RawMaterial {
 
     /**
      * Quantidade atualmente disponível em estoque.
-     * Unidade de medida definida pelo contexto de negócio (kg, litros, unidades, etc.).
      */
     @Column(name = "stock_quantity", nullable = false)
     private Double stockQuantity;
+
+    /**
+     * Unidade de medida da matéria-prima (ex.: {@code "kg"}, {@code "g"}, {@code "ton"}, {@code "caixas"}).
+     *
+     * <p>Valores aceitos: {@code kg}, {@code g}, {@code ton}, {@code caixas}.</p>
+     */
+    @Column(name = "unit_of_measure", nullable = false, length = 20)
+    private String unitOfMeasure;
 }
 

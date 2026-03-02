@@ -13,7 +13,8 @@ import lombok.*;
  * {
  *   "code": "MP001",
  *   "name": "Farinha de Trigo",
- *   "stockQuantity": 500.0
+ *   "stockQuantity": 500.0,
+ *   "unitOfMeasure": "kg"
  * }
  * }</pre>
  *
@@ -40,8 +41,13 @@ public class RawMaterialDTO {
 
     /**
      * Quantidade disponível em estoque.
-     * Unidade de medida definida pelo contexto de negócio (kg, litros, unidades, etc.).
      */
     private Double stockQuantity;
+
+    /**
+     * Unidade de medida da matéria-prima.
+     * Valores aceitos: {@code kg}, {@code g}, {@code ton}, {@code caixas}.
+     */
+    private String unitOfMeasure;
 }
 

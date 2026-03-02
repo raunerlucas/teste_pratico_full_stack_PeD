@@ -18,8 +18,20 @@ const columns = [
   {
     key: 'stockQuantity',
     label: t('rawMaterial.stockQuantity'),
-    formatter: (val) => formatNumber(val),
+    formatter: (val, row) => {
+      const unit = row?.unitOfMeasure || ''
+      return `${formatNumber(val)} ${unit}`
+    },
     class: 'text-right',
+  },
+  {
+    key: 'unitOfMeasure',
+    label: t('rawMaterial.unitOfMeasure'),
+    formatter: (val) => {
+      const key = `rawMaterial.units.${val}`
+      const translated = t(key)
+      return translated !== key ? translated : val || '-'
+    },
   },
 ]
 </script>

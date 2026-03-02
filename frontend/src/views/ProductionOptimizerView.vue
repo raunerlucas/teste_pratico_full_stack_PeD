@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted} from 'vue'
+import {onMounted, ref} from 'vue'
 import {useI18n} from 'vue-i18n'
 import {useProductionStore} from '@/stores/productionStore'
 import {useRawMaterialStore} from '@/stores/rawMaterialStore'
@@ -9,20 +9,26 @@ import BaseAlert from '@/components/common/BaseAlert.vue'
 import StockOverview from '@/components/production/StockOverview.vue'
 import ProductionResult from '@/components/production/ProductionResult.vue'
 import {formatCurrency} from '@/utils/formatters'
+import {getErrorI18nKey, parseApiError} from '@/utils/errorHandler'
 
 const { t } = useI18n()
 const productionStore = useProductionStore()
 const rawMaterialStore = useRawMaterialStore()
+
+const alert = ref({ show: false, type: 'error', message: '' })
 
 onMounted(() => {
   rawMaterialStore.fetchAll()
 })
 
 async function handleOptimize() {
+  alert.value.show = false
   try {
     await productionStore.fetchOptimization()
-  } catch {
-    // error handled in store
+  } catch (err) {
+    const errorInfo = parseApiError(err)
+    const key = getErrorI18nKey(errorInfo, 'production', 'optimize')
+    alert.value = { show: true, type: 'error', message: t(key) }
   }
 }
 </script>
@@ -52,7 +58,13 @@ async function handleOptimize() {
     </div>
 
     <!-- Error -->
-    <BaseAlert v-if="productionStore.error" type="error" :message="productionStore.error" />
+    <BaseAlert
+      v-if="alert.show"
+      type="error"
+      :message="alert.message"
+      dismissible
+      @dismiss="alert.show = false"
+    />
 
     <!-- Results -->
     <template v-if="productionStore.calculated">

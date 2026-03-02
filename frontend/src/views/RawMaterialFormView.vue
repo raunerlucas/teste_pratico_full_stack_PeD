@@ -6,6 +6,7 @@ import {useRawMaterialStore} from '@/stores/rawMaterialStore'
 import RawMaterialForm from '@/components/rawMaterial/RawMaterialForm.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
 import BaseAlert from '@/components/common/BaseAlert.vue'
+import {getErrorI18nKey, parseApiError} from '@/utils/errorHandler'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -23,13 +24,23 @@ onMounted(async () => {
     try {
       const data = await store.fetchById(route.params.id)
       initialData.value = data
+    } catch (err) {
+      const errorInfo = parseApiError(err)
+      const key = getErrorI18nKey(errorInfo, 'rawMaterial', 'load')
+      showAlert('error', t(key))
+    }
+  } else {
+    try {
+      const nextCode = await store.fetchNextCode()
+      initialData.value = { code: nextCode }
     } catch {
-      showAlert('error', t('common.error'))
+      // fallback — form starts with empty code
     }
   }
 })
 
 async function handleSubmit(formData) {
+  const action = isEditing.value ? 'update' : 'create'
   try {
     if (isEditing.value) {
       await store.update(route.params.id, formData)
@@ -39,8 +50,10 @@ async function handleSubmit(formData) {
       showAlert('success', t('rawMaterial.created'))
     }
     setTimeout(() => router.push('/raw-materials'), 1000)
-  } catch {
-    showAlert('error', t('common.error'))
+  } catch (err) {
+    const errorInfo = parseApiError(err)
+    const key = getErrorI18nKey(errorInfo, 'rawMaterial', action)
+    showAlert('error', t(key))
   }
 }
 

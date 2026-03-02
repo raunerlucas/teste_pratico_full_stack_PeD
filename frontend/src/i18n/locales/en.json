@@ -23,6 +23,13 @@
     "noData": "No records found.",
     "success": "Operation completed successfully!",
     "error": "An error occurred. Please try again.",
+    "errorNetwork": "Connection error. Please check if the server is running and try again.",
+    "errorNotFound": "The requested record was not found. It may have been deleted.",
+    "errorDuplicateCode": "A record with this code already exists. Please use a different code.",
+    "errorConflict": "Could not complete the operation due to a data conflict.",
+    "errorDeleteInUse": "This record cannot be deleted because it is used by other records.",
+    "errorBadRequest": "The submitted data is invalid. Please check the fields and try again.",
+    "errorServer": "Internal server error. Please try again later.",
     "confirmDelete": "Are you sure you want to delete this record?",
     "confirmDeleteTitle": "Confirm Deletion",
     "yes": "Yes",
@@ -54,10 +61,22 @@
     "codePlaceholder": "E.g.: MP001",
     "namePlaceholder": "E.g.: Wheat Flour",
     "stockPlaceholder": "E.g.: 500",
+    "unitOfMeasure": "Unit of Measure",
+    "unitOfMeasurePlaceholder": "Select unit",
+    "units": {
+      "kg": "Kilogram (kg)",
+      "g": "Gram (g)",
+      "ton": "Ton (ton)",
+      "caixas": "Boxes (units)"
+    },
     "deleteConfirm": "Are you sure you want to delete the raw material \"{name}\"?",
     "created": "Raw material created successfully!",
     "updated": "Raw material updated successfully!",
-    "deleted": "Raw material deleted successfully!"
+    "deleted": "Raw material deleted successfully!",
+    "errorDuplicateCode": "A raw material with this code already exists. Please use a different code.",
+    "errorNotFound": "Raw material not found. It may have been deleted.",
+    "errorDeleteInUse": "This raw material cannot be deleted because it is used in product compositions. Remove it from products first.",
+    "errorLoad": "Error loading raw materials. Please try again."
   },
   "product": {
     "title": "Products",
@@ -80,7 +99,11 @@
     "deleteConfirm": "Are you sure you want to delete the product \"{name}\"?",
     "created": "Product created successfully!",
     "updated": "Product updated successfully!",
-    "deleted": "Product deleted successfully!"
+    "deleted": "Product deleted successfully!",
+    "errorDuplicateCode": "A product with this code already exists. Please use a different code.",
+    "errorNotFound": "Product not found. It may have been deleted.",
+    "errorLoad": "Error loading products. Please try again.",
+    "errorRawMaterialNotFound": "One of the raw materials in the composition was not found. Please check the data."
   },
   "production": {
     "title": "Production Optimization",
@@ -97,7 +120,8 @@
     "grandTotal": "Total Sales Value",
     "suggestedProducts": "Suggested Products",
     "noSuggestions": "No production suggestions available with current stock.",
-    "description": "Analyze current stock and discover which products to manufacture for maximum total sales value."
+    "description": "Analyze current stock and discover which products to manufacture for maximum total sales value.",
+    "errorOptimize": "Error calculating production optimization. Please try again."
   },
   "footer": {
     "text": "Full Stack Practical Test — R&D",

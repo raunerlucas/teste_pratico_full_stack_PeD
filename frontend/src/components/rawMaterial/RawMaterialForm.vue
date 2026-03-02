@@ -1,7 +1,8 @@
 <script setup>
-import {reactive, watch} from 'vue'
+import {computed, reactive, watch} from 'vue'
 import {useI18n} from 'vue-i18n'
 import BaseInput from '@/components/common/BaseInput.vue'
+import BaseSelect from '@/components/common/BaseSelect.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import {hasErrors, validateRawMaterial} from '@/utils/validators'
 
@@ -18,9 +19,17 @@ const form = reactive({
   code: '',
   name: '',
   stockQuantity: 0,
+  unitOfMeasure: 'kg',
 })
 
 const errors = reactive({})
+
+const unitOptions = computed(() => [
+  { value: 'kg', label: t('rawMaterial.units.kg') },
+  { value: 'g', label: t('rawMaterial.units.g') },
+  { value: 'ton', label: t('rawMaterial.units.ton') },
+  { value: 'caixas', label: t('rawMaterial.units.caixas') },
+])
 
 watch(
   () => props.initialData,
@@ -29,6 +38,7 @@ watch(
       form.code = data.code || ''
       form.name = data.name || ''
       form.stockQuantity = data.stockQuantity ?? 0
+      form.unitOfMeasure = data.unitOfMeasure || 'kg'
     }
   },
   { immediate: true },
@@ -49,6 +59,7 @@ function handleSubmit() {
     code: form.code.trim(),
     name: form.name.trim(),
     stockQuantity: Number(form.stockQuantity),
+    unitOfMeasure: form.unitOfMeasure,
   })
 }
 </script>
@@ -75,6 +86,14 @@ function handleSubmit() {
       :placeholder="t('rawMaterial.stockPlaceholder')"
       :error="errors.stockQuantity ? t('common.' + errors.stockQuantity) : ''"
       type="number"
+      required
+    />
+    <BaseSelect
+      v-model="form.unitOfMeasure"
+      :label="t('rawMaterial.unitOfMeasure')"
+      :placeholder="t('rawMaterial.unitOfMeasurePlaceholder')"
+      :options="unitOptions"
+      :error="errors.unitOfMeasure ? t('common.' + errors.unitOfMeasure) : ''"
       required
     />
     <div class="flex items-center space-x-3 pt-4">

@@ -43,6 +43,15 @@ export const useRawMaterialStore = defineStore('rawMaterial', {
       }
     },
 
+    async fetchNextCode() {
+      try {
+        const { data } = await rawMaterialService.getNextCode()
+        return data.nextCode
+      } catch {
+        return 'MP001'
+      }
+    },
+
     async create(payload) {
       this.loading = true
       this.error = null

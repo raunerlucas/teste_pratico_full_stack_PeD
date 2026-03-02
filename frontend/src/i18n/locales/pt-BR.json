@@ -23,6 +23,13 @@
     "noData": "Nenhum registro encontrado.",
     "success": "Operação realizada com sucesso!",
     "error": "Ocorreu um erro. Tente novamente.",
+    "errorNetwork": "Erro de conexão. Verifique se o servidor está ativo e tente novamente.",
+    "errorNotFound": "O registro solicitado não foi encontrado. Ele pode ter sido removido.",
+    "errorDuplicateCode": "Já existe um registro com este código. Utilize um código diferente.",
+    "errorConflict": "Não foi possível completar a operação devido a um conflito de dados.",
+    "errorDeleteInUse": "Este registro não pode ser excluído pois está sendo utilizado por outros registros.",
+    "errorBadRequest": "Os dados enviados são inválidos. Verifique os campos e tente novamente.",
+    "errorServer": "Erro interno do servidor. Tente novamente mais tarde.",
     "confirmDelete": "Tem certeza que deseja excluir este registro?",
     "confirmDeleteTitle": "Confirmar Exclusão",
     "yes": "Sim",
@@ -54,10 +61,22 @@
     "codePlaceholder": "Ex: MP001",
     "namePlaceholder": "Ex: Farinha de Trigo",
     "stockPlaceholder": "Ex: 500",
+    "unitOfMeasure": "Unidade de Medida",
+    "unitOfMeasurePlaceholder": "Selecione a unidade",
+    "units": {
+      "kg": "Quilograma (kg)",
+      "g": "Grama (g)",
+      "ton": "Tonelada (ton)",
+      "caixas": "Caixas (un)"
+    },
     "deleteConfirm": "Tem certeza que deseja excluir a matéria-prima \"{name}\"?",
     "created": "Matéria-prima criada com sucesso!",
     "updated": "Matéria-prima atualizada com sucesso!",
-    "deleted": "Matéria-prima excluída com sucesso!"
+    "deleted": "Matéria-prima excluída com sucesso!",
+    "errorDuplicateCode": "Já existe uma matéria-prima com este código. Utilize um código diferente.",
+    "errorNotFound": "Matéria-prima não encontrada. Ela pode ter sido removida.",
+    "errorDeleteInUse": "Esta matéria-prima não pode ser excluída pois está sendo utilizada em composições de produtos. Remova-a dos produtos primeiro.",
+    "errorLoad": "Erro ao carregar matérias-primas. Tente novamente."
   },
   "product": {
     "title": "Produtos",
@@ -80,7 +99,11 @@
     "deleteConfirm": "Tem certeza que deseja excluir o produto \"{name}\"?",
     "created": "Produto criado com sucesso!",
     "updated": "Produto atualizado com sucesso!",
-    "deleted": "Produto excluído com sucesso!"
+    "deleted": "Produto excluído com sucesso!",
+    "errorDuplicateCode": "Já existe um produto com este código. Utilize um código diferente.",
+    "errorNotFound": "Produto não encontrado. Ele pode ter sido removido.",
+    "errorLoad": "Erro ao carregar produtos. Tente novamente.",
+    "errorRawMaterialNotFound": "Uma das matérias-primas da composição não foi encontrada. Verifique os dados."
   },
   "production": {
     "title": "Otimização de Produção",
@@ -97,7 +120,8 @@
     "grandTotal": "Valor Total de Venda",
     "suggestedProducts": "Produtos Sugeridos",
     "noSuggestions": "Nenhuma sugestão de produção disponível com o estoque atual.",
-    "description": "Analise o estoque atual e descubra quais produtos fabricar para obter o maior valor total de venda."
+    "description": "Analise o estoque atual e descubra quais produtos fabricar para obter o maior valor total de venda.",
+    "errorOptimize": "Erro ao calcular a otimização de produção. Tente novamente."
   },
   "footer": {
     "text": "Teste Prático Full Stack — P&D",

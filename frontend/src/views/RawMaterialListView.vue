@@ -7,6 +7,7 @@ import RawMaterialTable from '@/components/rawMaterial/RawMaterialTable.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseModal from '@/components/common/BaseModal.vue'
 import BaseAlert from '@/components/common/BaseAlert.vue'
+import {getErrorI18nKey, parseApiError} from '@/utils/errorHandler'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -33,8 +34,10 @@ async function confirmDelete() {
   try {
     await store.remove(itemToDelete.value.id)
     showAlert('success', t('rawMaterial.deleted'))
-  } catch {
-    showAlert('error', t('common.error'))
+  } catch (err) {
+    const errorInfo = parseApiError(err)
+    const key = getErrorI18nKey(errorInfo, 'rawMaterial', 'delete')
+    showAlert('error', t(key))
   } finally {
     showDeleteModal.value = false
     itemToDelete.value = null
@@ -45,7 +48,7 @@ function showAlert(type, message) {
   alert.value = { show: true, type, message }
   setTimeout(() => {
     alert.value.show = false
-  }, 3000)
+  }, 5000)
 }
 </script>
 
@@ -66,7 +69,7 @@ function showAlert(type, message) {
       @dismiss="alert.show = false"
     />
 
-    <BaseAlert v-if="store.error" type="error" :message="store.error" />
+    <BaseAlert v-if="store.error && !alert.show" type="error" :message="t('rawMaterial.errorLoad')" />
 
     <RawMaterialTable
       :items="store.items"

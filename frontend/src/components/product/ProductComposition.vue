@@ -53,7 +53,7 @@ function handleUpdate(index, field, value) {
         >
           <option value="" disabled>{{ t('product.selectRawMaterial') }}</option>
           <option v-for="rm in rawMaterials" :key="rm.id" :value="rm.id">
-            {{ rm.code }} - {{ rm.name }} ({{ rm.stockQuantity }})
+            {{ rm.code }} - {{ rm.name }} ({{ rm.stockQuantity }} {{ rm.unitOfMeasure || '' }})
           </option>
         </select>
       </div>

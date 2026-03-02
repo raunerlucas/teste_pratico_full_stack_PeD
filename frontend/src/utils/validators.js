@@ -22,6 +22,11 @@ export function positive(value) {
 }
 
 /**
+ * Valid unit of measure values.
+ */
+const VALID_UNITS = ['kg', 'g', 'ton', 'caixas']
+
+/**
  * Validate raw material form data. Returns an object with field errors.
  */
 export function validateRawMaterial(data) {
@@ -29,6 +34,7 @@ export function validateRawMaterial(data) {
   if (!required(data.code)) errors.code = 'required'
   if (!required(data.name)) errors.name = 'required'
   if (!nonNegative(data.stockQuantity)) errors.stockQuantity = 'invalidValue'
+  if (!required(data.unitOfMeasure) || !VALID_UNITS.includes(data.unitOfMeasure)) errors.unitOfMeasure = 'required'
   return errors
 }
 

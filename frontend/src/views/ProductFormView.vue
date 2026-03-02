@@ -10,6 +10,7 @@ import BaseButton from '@/components/common/BaseButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
 import BaseAlert from '@/components/common/BaseAlert.vue'
 import {hasErrors, validateProduct} from '@/utils/validators'
+import {getErrorI18nKey, parseApiError} from '@/utils/errorHandler'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -43,8 +44,10 @@ onMounted(async () => {
         rawMaterialId: c.rawMaterial?.id || c.rawMaterialId,
         requiredQuantity: c.requiredQuantity,
       }))
-    } catch {
-      showAlert('error', t('common.error'))
+    } catch (err) {
+      const errorInfo = parseApiError(err)
+      const key = getErrorI18nKey(errorInfo, 'product', 'load')
+      showAlert('error', t(key))
     }
   }
 })
@@ -94,8 +97,11 @@ async function handleSubmit() {
       showAlert('success', t('product.created'))
     }
     setTimeout(() => router.push('/products'), 1000)
-  } catch {
-    showAlert('error', t('common.error'))
+  } catch (err) {
+    const action = isEditing.value ? 'update' : 'create'
+    const errorInfo = parseApiError(err)
+    const key = getErrorI18nKey(errorInfo, 'product', action)
+    showAlert('error', t(key))
   }
 }
 

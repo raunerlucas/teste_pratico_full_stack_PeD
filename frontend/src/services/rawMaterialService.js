@@ -7,6 +7,9 @@ export default {
   getById(id) {
     return api.get(`/raw-materials/${id}`)
   },
+  getNextCode() {
+    return api.get('/raw-materials/next-code')
+  },
   create(data) {
     return api.post('/raw-materials', data)
   },

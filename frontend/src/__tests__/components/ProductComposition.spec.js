@@ -11,8 +11,8 @@ const i18n = createI18n({
 })
 
 const rawMaterials = [
-  { id: 1, code: 'MP001', name: 'Farinha', stockQuantity: 500 },
-  { id: 2, code: 'MP002', name: 'Açúcar', stockQuantity: 200 },
+  { id: 1, code: 'MP001', name: 'Farinha', stockQuantity: 500, unitOfMeasure: 'kg' },
+  { id: 2, code: 'MP002', name: 'Açúcar', stockQuantity: 200, unitOfMeasure: 'g' },
 ]
 
 function mountComp(props = {}) {
@@ -59,6 +59,18 @@ describe('ProductComposition', () => {
     await removeBtn.trigger('click')
     expect(wrapper.emitted('remove')).toBeTruthy()
     expect(wrapper.emitted('remove')[0][0]).toBe(0)
+  })
+
+  it('displays unitOfMeasure in raw material dropdown options', () => {
+    const wrapper = mountComp({
+      compositions: [{ rawMaterialId: 1, requiredQuantity: 200 }],
+    })
+    const options = wrapper.findAll('option')
+    // First option is placeholder, then 2 raw materials
+    const farinhaOption = options.find((o) => o.text().includes('Farinha'))
+    expect(farinhaOption.text()).toContain('kg')
+    const acucarOption = options.find((o) => o.text().includes('Açúcar'))
+    expect(acucarOption.text()).toContain('g')
   })
 })
 

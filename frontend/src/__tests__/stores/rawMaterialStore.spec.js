@@ -7,6 +7,7 @@ vi.mock('@/services/rawMaterialService', () => ({
   default: {
     getAll: vi.fn(),
     getById: vi.fn(),
+    getNextCode: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
@@ -41,6 +42,24 @@ describe('rawMaterialStore', () => {
 
     expect(store.error).toBe('Network error')
     expect(store.loading).toBe(false)
+  })
+
+  it('fetchNextCode returns next code from service', async () => {
+    rawMaterialService.getNextCode.mockResolvedValue({ data: { nextCode: 'MP006' } })
+
+    const store = useRawMaterialStore()
+    const result = await store.fetchNextCode()
+
+    expect(result).toBe('MP006')
+  })
+
+  it('fetchNextCode returns MP001 on failure', async () => {
+    rawMaterialService.getNextCode.mockRejectedValue(new Error('fail'))
+
+    const store = useRawMaterialStore()
+    const result = await store.fetchNextCode()
+
+    expect(result).toBe('MP001')
   })
 
   it('create adds item to items', async () => {

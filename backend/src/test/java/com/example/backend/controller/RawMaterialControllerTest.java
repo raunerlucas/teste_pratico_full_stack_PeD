@@ -3,6 +3,7 @@ package com.example.backend.controller;
 import com.example.backend.dto.RawMaterialDTO;
 import com.example.backend.entity.RawMaterial;
 import com.example.backend.exception.GlobalExceptionHandler;
+import com.example.backend.exception.DuplicateCodeException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.service.RawMaterialService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -89,6 +90,35 @@ class RawMaterialControllerTest {
         }
     }
 
+    // ── GET /api/raw-materials/next-code ────────────────────────────────────────
+
+    @Nested
+    @DisplayName("GET /api/raw-materials/next-code")
+    class GetNextCode {
+
+        @Test
+        @DisplayName("200 OK — Deve retornar o próximo código sequencial")
+        void shouldReturn200WithNextCode() throws Exception {
+            when(service.generateNextCode()).thenReturn("MP006");
+
+            mockMvc.perform(get("/api/raw-materials/next-code"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.nextCode").value("MP006"));
+
+            verify(service, times(1)).generateNextCode();
+        }
+
+        @Test
+        @DisplayName("200 OK — Deve retornar MP001 quando não há registros")
+        void shouldReturnMP001WhenEmpty() throws Exception {
+            when(service.generateNextCode()).thenReturn("MP001");
+
+            mockMvc.perform(get("/api/raw-materials/next-code"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.nextCode").value("MP001"));
+        }
+    }
+
     // ── GET /api/raw-materials/{id} ─────────────────────────────────────────────
 
     @Nested
@@ -148,6 +178,25 @@ class RawMaterialControllerTest {
                     .andExpect(jsonPath("$.stockQuantity").value(500.0));
 
             verify(service, times(1)).create(any(RawMaterialDTO.class));
+        }
+
+        @Test
+        @DisplayName("409 Conflict — Deve retornar erro ao criar com código duplicado")
+        void shouldReturn409WhenDuplicateCode() throws Exception {
+            RawMaterialDTO dto = RawMaterialDTO.builder()
+                    .code("MP001").name("Farinha").stockQuantity(500.0).build();
+
+            when(service.create(any(RawMaterialDTO.class)))
+                    .thenThrow(new DuplicateCodeException(
+                            "Raw material with code 'MP001' already exists. Please use a different code."));
+
+            mockMvc.perform(post("/api/raw-materials")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.status").value(409))
+                    .andExpect(jsonPath("$.error").value("Conflict"))
+                    .andExpect(jsonPath("$.message").value("Raw material with code 'MP001' already exists. Please use a different code."));
         }
     }
 

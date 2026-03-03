@@ -2,6 +2,7 @@ package com.example.backend.exception;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -83,6 +84,47 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().get("status")).isEqualTo(409);
         assertThat(response.getBody().get("message")).isEqualTo("Raw material with code 'MP001' already exists.");
+    }
+
+    @Test
+    @DisplayName("handleGeneral — Deve desembrulhar ResourceNotFoundException aninhada e retornar 404")
+    void shouldUnwrapNestedResourceNotFoundException() {
+        ResourceNotFoundException cause = new ResourceNotFoundException("Product not found with id: 5");
+        Exception wrapper = new RuntimeException("Transaction failed", cause);
+
+        ResponseEntity<Map<String, Object>> response = handler.handleGeneral(wrapper);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().get("status")).isEqualTo(404);
+        assertThat(response.getBody().get("message")).isEqualTo("Product not found with id: 5");
+    }
+
+    @Test
+    @DisplayName("handleDataIntegrity — Deve retornar 409 com mensagem de código duplicado para unique constraint")
+    void shouldReturn409ForUniqueConstraintViolation() {
+        var rootCause = new RuntimeException("Unique index or primary key violation: \"PUBLIC.UK_RAW_MATERIAL_CODE\"");
+        DataIntegrityViolationException ex = new DataIntegrityViolationException("could not execute statement", rootCause);
+
+        ResponseEntity<Map<String, Object>> response = handler.handleDataIntegrity(ex);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().get("status")).isEqualTo(409);
+        assertThat(response.getBody().get("message")).asString().contains("already exists");
+    }
+
+    @Test
+    @DisplayName("handleDataIntegrity — Deve retornar 409 com mensagem de FK para referential integrity")
+    void shouldReturn409ForReferentialIntegrityViolation() {
+        var rootCause = new RuntimeException("Referential integrity constraint violation: FK_PRODUCT_COMPOSITION_RAW_MATERIAL");
+        DataIntegrityViolationException ex = new DataIntegrityViolationException("could not execute statement", rootCause);
+
+        ResponseEntity<Map<String, Object>> response = handler.handleDataIntegrity(ex);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().get("message")).asString().contains("cannot be deleted");
     }
 
     @Test

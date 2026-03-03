@@ -6,6 +6,7 @@ import com.example.backend.entity.Product;
 import com.example.backend.entity.ProductComposition;
 import com.example.backend.entity.RawMaterial;
 import com.example.backend.exception.GlobalExceptionHandler;
+import com.example.backend.exception.DuplicateCodeException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.service.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -210,6 +211,27 @@ class ProductControllerTest {
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.compositions", hasSize(0)));
+        }
+
+        @Test
+        @DisplayName("409 Conflict — Deve retornar erro ao criar com código duplicado")
+        void shouldReturn409WhenDuplicateCode() throws Exception {
+            ProductDTO dto = ProductDTO.builder()
+                    .code("PRD001").name("Pão").price(12.50)
+                    .compositions(null)
+                    .build();
+
+            when(service.create(any(ProductDTO.class)))
+                    .thenThrow(new DuplicateCodeException(
+                            "Product with code 'PRD001' already exists. Please use a different code."));
+
+            mockMvc.perform(post("/api/products")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.status").value(409))
+                    .andExpect(jsonPath("$.error").value("Conflict"))
+                    .andExpect(jsonPath("$.message").value("Product with code 'PRD001' already exists. Please use a different code."));
         }
     }
 

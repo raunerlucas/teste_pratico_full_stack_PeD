@@ -54,6 +54,43 @@ class RawMaterialServiceTest {
                 .build();
     }
 
+    // ── generateNextCode ────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("generateNextCode()")
+    class GenerateNextCode {
+
+        @Test
+        @DisplayName("Deve retornar MP001 quando não há matérias-primas cadastradas")
+        void shouldReturnMP001WhenNoRawMaterials() {
+            when(repository.findMaxCodeWithPrefix()).thenReturn(Optional.empty());
+
+            String result = service.generateNextCode();
+
+            assertThat(result).isEqualTo("MP001");
+        }
+
+        @Test
+        @DisplayName("Deve retornar MP006 quando o último código é MP005")
+        void shouldReturnMP006WhenLastIsMP005() {
+            when(repository.findMaxCodeWithPrefix()).thenReturn(Optional.of("MP005"));
+
+            String result = service.generateNextCode();
+
+            assertThat(result).isEqualTo("MP006");
+        }
+
+        @Test
+        @DisplayName("Deve retornar MP100 quando o último código é MP099")
+        void shouldReturnMP100WhenLastIsMP099() {
+            when(repository.findMaxCodeWithPrefix()).thenReturn(Optional.of("MP099"));
+
+            String result = service.generateNextCode();
+
+            assertThat(result).isEqualTo("MP100");
+        }
+    }
+
     // ── findAll ─────────────────────────────────────────────────────────────────
 
     @Nested

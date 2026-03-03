@@ -30,7 +30,9 @@ const navItems = [
   <!-- Sidebar -->
   <aside
     :class="[
-      'fixed top-16 left-0 z-40 h-[calc(100vh-4rem)] w-64 bg-white border-r border-gray-200 transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto',
+      'fixed top-16 left-0 z-40 w-64 bg-white border-r border-gray-200 transition-transform duration-300',
+      'h-[calc(100vh-4rem)]',
+      'lg:sticky lg:top-16 lg:z-auto lg:translate-x-0 lg:shrink-0',
       open ? 'translate-x-0' : '-translate-x-full',
     ]"
   >

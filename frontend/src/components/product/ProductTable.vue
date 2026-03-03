@@ -10,7 +10,7 @@ defineProps({
   loading: { type: Boolean, default: false },
 })
 
-defineEmits(['edit', 'delete'])
+defineEmits(['edit', 'delete', 'row-click'])
 
 const columns = [
   { key: 'code', label: t('product.code') },
@@ -37,6 +37,7 @@ const columns = [
     :loading="loading"
     @edit="$emit('edit', $event)"
     @delete="$emit('delete', $event)"
+    @row-click="$emit('row-click', $event)"
   />
 </template>
 

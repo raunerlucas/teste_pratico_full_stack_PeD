@@ -14,7 +14,7 @@ defineProps({
   showActions: { type: Boolean, default: true },
 })
 
-defineEmits(['edit', 'delete'])
+defineEmits(['edit', 'delete', 'row-click'])
 </script>
 
 <template>
@@ -62,7 +62,8 @@ defineEmits(['edit', 'delete'])
           v-else
           v-for="(row, idx) in rows"
           :key="row.id || idx"
-          class="hover:bg-gray-50 transition-colors"
+          class="hover:bg-gray-50 transition-colors cursor-pointer"
+          @click="$emit('row-click', row)"
         >
           <td
             v-for="col in columns"
@@ -75,13 +76,13 @@ defineEmits(['edit', 'delete'])
           <td v-if="showActions" class="px-6 py-4 whitespace-nowrap text-center text-sm space-x-2">
             <button
               class="text-blue-600 hover:text-blue-800 font-medium cursor-pointer"
-              @click="$emit('edit', row)"
+              @click.stop="$emit('edit', row)"
             >
               {{ t('common.edit') }}
             </button>
             <button
               class="text-red-600 hover:text-red-800 font-medium cursor-pointer"
-              @click="$emit('delete', row)"
+              @click.stop="$emit('delete', row)"
             >
               {{ t('common.delete') }}
             </button>

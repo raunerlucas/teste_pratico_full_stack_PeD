@@ -4,6 +4,7 @@ import {useRouter} from 'vue-router'
 import {useI18n} from 'vue-i18n'
 import {useProductStore} from '@/stores/productStore'
 import ProductTable from '@/components/product/ProductTable.vue'
+import ProductDetailModal from '@/components/product/ProductDetailModal.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseModal from '@/components/common/BaseModal.vue'
 import BaseAlert from '@/components/common/BaseAlert.vue'
@@ -15,6 +16,8 @@ const store = useProductStore()
 
 const showDeleteModal = ref(false)
 const itemToDelete = ref(null)
+const showDetailModal = ref(false)
+const selectedProduct = ref(null)
 const alert = ref({ show: false, type: 'success', message: '' })
 
 onMounted(() => {
@@ -23,6 +26,11 @@ onMounted(() => {
 
 function handleEdit(item) {
   router.push(`/products/${item.id}/edit`)
+}
+
+function handleRowClick(item) {
+  selectedProduct.value = item
+  showDetailModal.value = true
 }
 
 function handleDeleteClick(item) {
@@ -76,6 +84,7 @@ function showAlert(type, message) {
       :loading="store.loading"
       @edit="handleEdit"
       @delete="handleDeleteClick"
+      @row-click="handleRowClick"
     />
 
     <BaseModal
@@ -88,6 +97,12 @@ function showAlert(type, message) {
     >
       <p>{{ t('product.deleteConfirm', { name: itemToDelete?.name }) }}</p>
     </BaseModal>
+
+    <ProductDetailModal
+      :visible="showDetailModal"
+      :product="selectedProduct"
+      @close="showDetailModal = false"
+    />
   </div>
 </template>
 

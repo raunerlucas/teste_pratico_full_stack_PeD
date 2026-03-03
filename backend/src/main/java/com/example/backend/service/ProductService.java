@@ -83,6 +83,7 @@ public class ProductService {
                 .code(dto.getCode())
                 .name(dto.getName())
                 .price(dto.getPrice())
+                .description(dto.getDescription())
                 .compositions(new ArrayList<>())
                 .build();
 
@@ -129,6 +130,7 @@ public class ProductService {
         product.setCode(dto.getCode());
         product.setName(dto.getName());
         product.setPrice(dto.getPrice());
+        product.setDescription(dto.getDescription());
 
         product.getCompositions().clear();
 

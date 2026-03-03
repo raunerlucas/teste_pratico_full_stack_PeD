@@ -225,6 +225,37 @@ class ProductServiceTest {
         }
 
         @Test
+        @DisplayName("Deve criar produto com descrição opcional")
+        void shouldCreateProductWithDescription() {
+            ProductDTO dto = buildProductDTO("PRD001", "Pão", 12.50, null);
+            dto.setDescription("Pão crocante e saboroso");
+            when(repository.save(any(Product.class))).thenAnswer(inv -> {
+                Product p = inv.getArgument(0);
+                p.setId(1L);
+                return p;
+            });
+
+            Product result = service.create(dto);
+
+            assertThat(result.getDescription()).isEqualTo("Pão crocante e saboroso");
+        }
+
+        @Test
+        @DisplayName("Deve criar produto sem descrição (null)")
+        void shouldCreateProductWithoutDescription() {
+            ProductDTO dto = buildProductDTO("PRD001", "Pão", 12.50, null);
+            when(repository.save(any(Product.class))).thenAnswer(inv -> {
+                Product p = inv.getArgument(0);
+                p.setId(1L);
+                return p;
+            });
+
+            Product result = service.create(dto);
+
+            assertThat(result.getDescription()).isNull();
+        }
+
+        @Test
         @DisplayName("Deve lançar DuplicateCodeException ao criar produto com código já existente")
         void shouldThrowDuplicateCodeExceptionWhenCodeExists() {
             ProductDTO dto = buildProductDTO("PRD001", "Pão", 12.50, null);
@@ -270,6 +301,23 @@ class ProductServiceTest {
             assertThat(result.getCompositions()).hasSize(1);
             assertThat(result.getCompositions().get(0).getRawMaterial().getCode()).isEqualTo("MP002");
             assertThat(result.getCompositions().get(0).getRequiredQuantity()).isEqualTo(100.0);
+        }
+
+        @Test
+        @DisplayName("Deve atualizar a descrição do produto")
+        void shouldUpdateProductDescription() {
+            Product existing = buildProduct(1L, "PRD001", "Pão", 12.50);
+            existing.setDescription("Descrição antiga");
+
+            ProductDTO dto = buildProductDTO("PRD001", "Pão", 12.50, null);
+            dto.setDescription("Descrição nova e melhorada");
+
+            when(repository.findById(1L)).thenReturn(Optional.of(existing));
+            when(repository.save(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            Product result = service.update(1L, dto);
+
+            assertThat(result.getDescription()).isEqualTo("Descrição nova e melhorada");
         }
 
         @Test

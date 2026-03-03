@@ -52,6 +52,11 @@ public class ProductDTO {
     private Double price;
 
     /**
+     * Descrição opcional do produto.
+     */
+    private String description;
+
+    /**
      * Lista de composições do produto — cada item define uma matéria-prima
      * e a quantidade necessária para fabricar 1 unidade.
      *

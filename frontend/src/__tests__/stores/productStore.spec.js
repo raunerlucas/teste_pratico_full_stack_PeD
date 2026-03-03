@@ -21,7 +21,7 @@ describe('productStore', () => {
 
   it('fetchAll sets items', async () => {
     const data = [
-      { id: 1, code: 'PRD001', name: 'Pão', price: 12.5, compositions: [] },
+      { id: 1, code: 'PRD001', name: 'Pão', price: 12.5, description: 'Pão crocante', compositions: [] },
     ]
     productService.getAll.mockResolvedValue({ data })
 

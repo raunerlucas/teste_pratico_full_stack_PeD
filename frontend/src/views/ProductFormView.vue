@@ -24,6 +24,7 @@ const errors = reactive({})
 const form = reactive({
   code: '',
   name: '',
+  description: '',
   price: '',
   compositions: [],
 })
@@ -39,6 +40,7 @@ onMounted(async () => {
       const data = await productStore.fetchById(route.params.id)
       form.code = data.code || ''
       form.name = data.name || ''
+      form.description = data.description || ''
       form.price = data.price ?? ''
       form.compositions = (data.compositions || []).map((c) => ({
         rawMaterialId: c.rawMaterial?.id || c.rawMaterialId,
@@ -79,6 +81,7 @@ async function handleSubmit() {
   const payload = {
     code: form.code.trim(),
     name: form.name.trim(),
+    description: form.description.trim() || null,
     price: Number(form.price),
     compositions: form.compositions
       .filter((c) => c.rawMaterialId)
@@ -157,6 +160,18 @@ function showAlert(type, message) {
           type="number"
           required
         />
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            {{ t('product.description') }}
+          </label>
+          <textarea
+            v-model="form.description"
+            :placeholder="t('product.descriptionPlaceholder')"
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+          />
+        </div>
 
         <hr class="border-gray-200" />
 

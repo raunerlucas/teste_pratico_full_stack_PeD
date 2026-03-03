@@ -18,12 +18,13 @@ function toggleSidebar() {
     <div class="flex flex-1">
       <AppSidebar :open="sidebarOpen" @close="sidebarOpen = false" />
 
-      <main class="flex-1 p-6 lg:p-8 overflow-auto">
-        <router-view />
-      </main>
+      <div class="flex-1 flex flex-col min-w-0">
+        <main class="flex-1 p-6 lg:p-8">
+          <router-view />
+        </main>
+        <AppFooter />
+      </div>
     </div>
-
-    <AppFooter />
   </div>
 </template>
 

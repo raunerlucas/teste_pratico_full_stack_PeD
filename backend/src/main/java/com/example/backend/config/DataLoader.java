@@ -109,6 +109,7 @@ public class DataLoader implements CommandLineRunner {
                 .code("PRD001")
                 .name("Pão Francês")
                 .price(12.50)
+                .description("Pão crocante por fora e macio por dentro, feito com farinha de trigo, leite e manteiga.")
                 .build();
 
         pao.getCompositions().add(ProductComposition.builder()
@@ -128,6 +129,7 @@ public class DataLoader implements CommandLineRunner {
                 .code("PRD002")
                 .name("Bolo de Chocolate")
                 .price(35.00)
+                .description("Bolo fofinho de chocolate com cobertura cremosa. Rende 12 fatias.")
                 .build();
 
         bolo.getCompositions().add(ProductComposition.builder()
@@ -151,6 +153,7 @@ public class DataLoader implements CommandLineRunner {
                 .code("PRD003")
                 .name("Biscoito Amanteigado")
                 .price(8.00)
+                .description("Biscoitos crocantes feitos com manteiga de primeira qualidade.")
                 .build();
 
         biscoito.getCompositions().add(ProductComposition.builder()

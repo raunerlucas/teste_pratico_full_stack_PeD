@@ -57,6 +57,7 @@ class ProductControllerTest {
 
         Product product = Product.builder()
                 .id(1L).code("PRD001").name("Pão").price(12.50)
+                .description("Pão crocante e saboroso")
                 .compositions(new ArrayList<>())
                 .build();
 
@@ -123,6 +124,7 @@ class ProductControllerTest {
                     .andExpect(jsonPath("$.code").value("PRD001"))
                     .andExpect(jsonPath("$.name").value("Pão"))
                     .andExpect(jsonPath("$.price").value(12.50))
+                    .andExpect(jsonPath("$.description").value("Pão crocante e saboroso"))
                     .andExpect(jsonPath("$.compositions", hasSize(1)))
                     .andExpect(jsonPath("$.compositions[0].rawMaterial.code").value("MP001"))
                     .andExpect(jsonPath("$.compositions[0].requiredQuantity").value(200.0));

@@ -61,6 +61,12 @@ public class Product {
     private Double price;
 
     /**
+     * Descrição opcional do produto.
+     */
+    @Column(length = 500)
+    private String description;
+
+    /**
      * Lista de composições do produto — define quais matérias-primas e quantidades
      * são necessárias para fabricar 1 unidade.
      *
